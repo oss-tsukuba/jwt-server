@@ -2,21 +2,26 @@ package oss.tsukuba.utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class CryptUtil {
 
-	private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
+	private static final String ALGORITHM = "AES_256/GCM/NoPadding";
 
-	private static final String INIT_VECTOR = "yourInitVector01";
-
-	private static final IvParameterSpec IV = new IvParameterSpec(INIT_VECTOR.getBytes());
+	private static final byte[] IV;
 
 	private static MessageDigest md;
+
+    public static final int AES_KEY_SIZE = 256;
+
+    public static final int GCM_IV_LENGTH = 128;
 
 	static {
 		try {
@@ -24,6 +29,12 @@ public class CryptUtil {
 		} catch (NoSuchAlgorithmException e) {
 			LogUtils.error(e.toString(), e);
 		}
+		
+        IV = new byte[GCM_IV_LENGTH];
+
+        // Generate Key
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(IV);
 	}
 	
 	private static byte[] getSHA256(String pass) {
@@ -35,22 +46,27 @@ public class CryptUtil {
 	}
 	
 	public static String encrypt(String text, String pass) throws Exception {
-		SecretKeySpec key = new SecretKeySpec(getSHA256(pass), "AES");
+		byte[] plainText = text.getBytes();
 		
+		SecretKeySpec key = new SecretKeySpec(getSHA256(pass), "AES");
+		GCMParameterSpec params = new GCMParameterSpec(IV.length, IV);
 	    Cipher encrypter = Cipher.getInstance(ALGORITHM);
-	    encrypter.init(Cipher.ENCRYPT_MODE, key, IV);
-	    byte[] byteToken = encrypter.doFinal(text.getBytes());
+	    encrypter.init(Cipher.ENCRYPT_MODE, key, params);
 
-	    return new String(Base64.getEncoder().encode(byteToken));
+	    byte[] cipherText = new byte[encrypter.getOutputSize(plainText.length)];
+	    encrypter.doFinal(plainText, 0, plainText.length, cipherText);
+
+	    return new String(Base64.getEncoder().encode(cipherText));
 	}
 	
 	public static String decrypt(String text, String pass) throws Exception {
+		byte[] cipherText = text.getBytes();
+		
 		SecretKeySpec key = new SecretKeySpec(getSHA256(pass), "AES");
-
+		GCMParameterSpec params = new GCMParameterSpec(IV.length, IV);
 	    Cipher decrypter = Cipher.getInstance(ALGORITHM);
-	    decrypter.init(Cipher.DECRYPT_MODE, key, IV);
-	    byte[] byteToken = Base64.getDecoder().decode(text);
+	    decrypter.init(Cipher.DECRYPT_MODE, key, params);
 
-	    return new String(decrypter.doFinal(byteToken));
+	    return new String(decrypter.doFinal(cipherText, 0, cipherText.length));
 	}
 }
