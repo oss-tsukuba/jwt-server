@@ -27,4 +27,6 @@ File mvnw and mvnw.cmd can be redistributed and/or modified under
 the terms of the Apache License, Version 2.0.
 ( http://www.apache.org/licenses/LICENSE-2.0 )
 
-File Damm.java is based on https://github.com/DanielTillett/Damm32
+File Damm.java can be redistributed and/or modified under the
+2-clause BSD License.
+( https://github.com/DanielTillett/Damm32 )
