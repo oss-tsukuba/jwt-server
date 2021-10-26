@@ -78,6 +78,12 @@ public class Damm {
 	
 	private SecureRandom sr;
 	
+	/*
+         * WTA quasigroup matrix of order 32
+         * http://stackoverflow.com/questions/23431621/extending-the-damm-algorithm-to-base-32
+         * This was constructed according to Damm Lemma 5.2 by Michael
+         * (http://stackoverflow.com/users/3625116/michael)
+        */
 	private char[][] damm32Matrix = {
                 { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 3, 1, 7, 5, 11, 9, 15, 13, 19, 17, 23, 21, 27, 25, 31, 29},
                 { 2, 0, 6, 4, 10, 8, 14, 12, 18, 16, 22, 20, 26, 24, 30, 28, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31},
