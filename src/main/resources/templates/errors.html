@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Home</title>
+    <link th:href="@{webjars/bootstrap/5.1.2/css/bootstrap.min.css}" rel="stylesheet"/>
+    <script th:href="@{webjars/jquery/3.6.0/js/jquery.min.js}"></script>
+    <script th:href="@{webjars/bootstrap/5.1.2/js/bootstrap.min.js}"></script>
+</head>
+
+<body class="text-center">
+
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <main role="main" class="inner cover">
+        <h1 class="cover-heading">errors</h1>
+
+	<table class="table">
+		<tr>
+			<th class="item1">時間</th>	
+			<th class="item2">ユーザ</th>
+			<th class="item3">エラー</th>
+	    </tr>
+		<tr th:each="error, iterStat : ${errors}">
+		    <td th:text="${error.dispDate}"></td>
+		    <td th:text="${error.user}"></td>
+		    <td th:text="${error.error}"></td>		    
+        </tr>
+    </main>
+</div>
+
+</body>
