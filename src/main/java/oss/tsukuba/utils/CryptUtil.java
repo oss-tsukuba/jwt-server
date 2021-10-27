@@ -15,13 +15,11 @@ public class CryptUtil {
 
 	private static final String ALGORITHM = "AES_256/GCM/NoPadding";
 
-	private static final byte[] IV;
-
 	private static MessageDigest md;
 
-	public static final int AES_KEY_SIZE = 256;
+	private static final int GCM_IV_LENGTH = 12; // 96bit is commonly used
 
-	public static final int GCM_IV_LENGTH = 128;
+	private static final int GCM_TAG_BITS = 128;
 
 	static {
 		try {
@@ -29,14 +27,16 @@ public class CryptUtil {
 		} catch (NoSuchAlgorithmException e) {
 			LogUtils.error(e.toString(), e);
 		}
-
-		IV = new byte[GCM_IV_LENGTH];
-
-		// Generate Key
-		SecureRandom random = new SecureRandom();
-		random.nextBytes(IV);
 	}
 
+	public static byte[] generateIV() {
+		byte[] iv = new byte[GCM_IV_LENGTH];
+		SecureRandom random = new SecureRandom();
+		random.nextBytes(iv);
+
+		return iv;
+	}
+	
 	private static byte[] getSHA256(String pass) {
 		byte[] cipher_byte;
 		md.update(pass.getBytes());
@@ -45,28 +45,25 @@ public class CryptUtil {
 		return cipher_byte;
 	}
 
-	public static String encrypt(String text, String pass) throws Exception {
-		byte[] plainText = text.getBytes();
-
+	public static byte[] encrypt(byte[] plainText, String pass, byte[] iv) throws Exception {
 		SecretKeySpec key = new SecretKeySpec(getSHA256(pass), "AES");
-		GCMParameterSpec params = new GCMParameterSpec(IV.length, IV);
+		GCMParameterSpec params = new GCMParameterSpec(GCM_TAG_BITS, iv);
 		Cipher encrypter = Cipher.getInstance(ALGORITHM);
 		encrypter.init(Cipher.ENCRYPT_MODE, key, params);
 
-		byte[] cipherText = new byte[encrypter.getOutputSize(plainText.length)];
-		encrypter.doFinal(plainText, 0, plainText.length, cipherText);
+		byte[] cipherText = encrypter.doFinal(plainText);
 
-		return new String(Base64.getEncoder().encode(cipherText));
+		return cipherText;
 	}
 
-	public static String decrypt(String text, String pass) throws Exception {
-		byte[] cipherText = text.getBytes();
-
+	public static byte[] decrypt(byte[] cipherText, String pass, byte[] iv) throws Exception {
 		SecretKeySpec key = new SecretKeySpec(getSHA256(pass), "AES");
-		GCMParameterSpec params = new GCMParameterSpec(IV.length, IV);
+		GCMParameterSpec params = new GCMParameterSpec(GCM_TAG_BITS, iv);
 		Cipher decrypter = Cipher.getInstance(ALGORITHM);
 		decrypter.init(Cipher.DECRYPT_MODE, key, params);
 
-		return new String(decrypter.doFinal(cipherText, 0, cipherText.length));
+		byte[] plainText = decrypter.doFinal(cipherText);
+
+		return plainText;
 	}
 }
