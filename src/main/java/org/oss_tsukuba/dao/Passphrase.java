@@ -1,4 +1,4 @@
-package oss.tsukuba.dao;
+package org.oss_tsukuba.dao;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

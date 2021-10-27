@@ -61,7 +61,7 @@
  * https://en.wikipedia.org/wiki/Damm_algorithm
  */
 
-package oss.tsukuba.utils;
+package org.oss_tsukuba.utils;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;

@@ -1,4 +1,4 @@
-package oss.tsukuba.dao;
+package org.oss_tsukuba.dao;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

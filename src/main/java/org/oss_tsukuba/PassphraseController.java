@@ -1,7 +1,14 @@
-package oss.tsukuba;
+package org.oss_tsukuba;
 
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.oss_tsukuba.dao.Error;
+import org.oss_tsukuba.dao.ErrorRepository;
+import org.oss_tsukuba.dao.Passphrase;
+import org.oss_tsukuba.dao.PassphraseRepository;
+import org.oss_tsukuba.utils.CryptUtil;
+import org.oss_tsukuba.utils.Damm;
+import org.oss_tsukuba.utils.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,14 +21,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestTemplate;
-
-import oss.tsukuba.dao.Error;
-import oss.tsukuba.dao.ErrorRepository;
-import oss.tsukuba.dao.Passphrase;
-import oss.tsukuba.dao.PassphraseRepository;
-import oss.tsukuba.utils.CryptUtil;
-import oss.tsukuba.utils.Damm;
-import oss.tsukuba.utils.LogUtils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

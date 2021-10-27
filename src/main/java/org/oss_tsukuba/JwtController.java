@@ -1,4 +1,4 @@
-package oss.tsukuba;
+package org.oss_tsukuba;
 
 import java.util.Base64;
 import java.util.Date;
@@ -6,19 +6,18 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.oss_tsukuba.dao.Error;
+import org.oss_tsukuba.dao.ErrorRepository;
+import org.oss_tsukuba.dao.Passphrase;
+import org.oss_tsukuba.dao.PassphraseRepository;
+import org.oss_tsukuba.utils.CryptUtil;
+import org.oss_tsukuba.utils.Damm;
+import org.oss_tsukuba.utils.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import oss.tsukuba.dao.Error;
-import oss.tsukuba.dao.ErrorRepository;
-import oss.tsukuba.dao.Passphrase;
-import oss.tsukuba.dao.PassphraseRepository;
-import oss.tsukuba.utils.CryptUtil;
-import oss.tsukuba.utils.Damm;
-import oss.tsukuba.utils.LogUtils;
 
 @RestController
 public class JwtController {

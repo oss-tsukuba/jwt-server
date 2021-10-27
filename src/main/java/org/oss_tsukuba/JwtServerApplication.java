@@ -1,4 +1,4 @@
-package oss.tsukuba;
+package org.oss_tsukuba;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

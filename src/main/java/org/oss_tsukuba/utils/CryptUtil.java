@@ -1,4 +1,4 @@
-package oss.tsukuba.utils;
+package org.oss_tsukuba.utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

@@ -1,4 +1,4 @@
-package oss.tsukuba;
+package org.oss_tsukuba;
 
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;

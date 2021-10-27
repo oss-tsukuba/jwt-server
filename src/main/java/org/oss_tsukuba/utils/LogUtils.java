@@ -1,4 +1,4 @@
-package oss.tsukuba.utils;
+package org.oss_tsukuba.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
