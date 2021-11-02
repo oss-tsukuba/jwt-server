@@ -14,17 +14,31 @@
     <main role="main" class="inner cover">
         <h1 class="cover-heading">errors</h1>
 
-	<table class="table">
+		<br>
+		
+	<table class="table table-striped condensed">
+		<thead>
 		<tr>
 			<th class="item1">時間</th>	
 			<th class="item2">ユーザ</th>
-			<th class="item3">エラー</th>
+			<th class="item3">IPアドレス</th>
+			<th class="item4">ホスト名</th>
+			<th class="item5">エラー</th>
 	    </tr>
+	    </thead>
+	    <tbody>
 		<tr th:each="error, iterStat : ${errors}">
 		    <td th:text="${error.dispDate}"></td>
 		    <td th:text="${error.user}"></td>
+		    <td th:text="${error.ipAddr}"></td>
+		    <td th:text="${error.hostname}"></td>
 		    <td th:text="${error.error}"></td>		    
         </tr>
+        </tbody>
+    </table>
+    
+    <a href="/">back</a>
+        
     </main>
 </div>
 
