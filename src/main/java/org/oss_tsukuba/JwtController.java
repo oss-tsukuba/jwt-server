@@ -1,7 +1,6 @@
 package org.oss_tsukuba;
 
 import java.util.Base64;
-import java.util.Date;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +18,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.oss_tsukuba.dao.Error.CHECK_DIGIT_ERROR;
+import static org.oss_tsukuba.dao.Error.DECRYPT_ERROR;
+import static org.oss_tsukuba.dao.Error.LENGTH_ERROR;
+import static org.oss_tsukuba.dao.Error.CHARACTER_ERROR;;
+
 @RestController
 public class JwtController {
 
@@ -31,20 +35,42 @@ public class JwtController {
 	@RequestMapping(value = "/jwt", method = RequestMethod.POST)
 	public String getJwt(@RequestParam(name = "user", required = true) String user,
 			@RequestParam(name = "pass", required = true) String pass, HttpServletRequest request) {
+		String ipAddr = request.getRemoteAddr();
+		String hostname = request.getRemoteHost();
+		
 		String jwt = "";
 
-		// check digit の検査
-		Damm dmm = new Damm();
-		if (!dmm.damm32Check(pass.toCharArray())) {
+		Damm damm = new Damm();
+		char[] code = pass.toCharArray();
+		
+		// 文字数の検査
+		if (!damm.isValidLength(code)) {
 			// error
-			LogUtils.error("check digit error");
-			Error error = new Error();
-			error.setUser(user);
-			error.setDate(new Date());
-			error.setType(0);
+			LogUtils.error("length error");
+			Error error = new Error(user, ipAddr, hostname, LENGTH_ERROR);
 			errorRepository.save(error);
 
-			return "error no: 0";
+			return null;
+		}
+		
+		// 文字の検査
+		if (!damm.isValidChar(code)) {
+			// error
+			LogUtils.error("character error");
+			Error error = new Error(user, ipAddr, hostname, CHARACTER_ERROR);
+			errorRepository.save(error);
+
+			return null;
+		}
+		
+		// check digit の検査
+		if (!damm.damm32Check(code)) {
+			// error
+			LogUtils.error("check digit error");
+			Error error = new Error(user, ipAddr, hostname, CHECK_DIGIT_ERROR);
+			errorRepository.save(error);
+
+			return null;
 		}
 
 		// 復号化
@@ -57,13 +83,10 @@ public class JwtController {
 			jwt = new String(jwtByte);
 		} catch (Exception e) {
 			LogUtils.error(e.toString(), e);
-			Error error = new Error();
-			error.setUser(user);
-			error.setDate(new Date());
-			error.setType(1);
+			Error error = new Error(user, ipAddr, hostname, DECRYPT_ERROR);
 			errorRepository.save(error);
 
-			return "error no: 1";
+			return null;
 		}
 
 		return jwt;

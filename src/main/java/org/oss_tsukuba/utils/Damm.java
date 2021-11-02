@@ -65,17 +65,25 @@ package org.oss_tsukuba.utils;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Date;
-import java.util.Random;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Damm {
 
-	private final int KEY_SIZE = 31;
+	private static final int KEY_SIZE = 31;
 
-	private final int BASE = 32;
+	private static final int BASE = 32;
 
-	private final char[] BASE32 = "2345679abcdefghijkmnopqrstuvwxyz".toCharArray();
+	private static final char[] BASE32 = "2345679abcdefghijkmnopqrstuvwxyz".toCharArray();
 
+	private static Set<Character> charSet = new HashSet<>();
+	
+	static {
+		for (char c: BASE32) {
+			charSet.add(c);
+		}
+	}
+	
 	private SecureRandom sr;
 
 	/*
@@ -197,7 +205,22 @@ public class Damm {
 
 		return BASE32[interim];
 	}
-
+	
+	public boolean isValidLength(char[] code) {
+		return code.length == KEY_SIZE + 1;
+	}
+	
+	public boolean isValidChar(char[] code) {
+		
+		for (char c: code) {
+			if (!charSet.contains(c)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	public boolean damm32Check(char[] code) {
 		return damm32Encode(code) == BASE32[0];
 	}

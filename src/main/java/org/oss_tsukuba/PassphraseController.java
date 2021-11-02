@@ -6,6 +6,7 @@ import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
 import org.oss_tsukuba.dao.Passphrase;
 import org.oss_tsukuba.dao.PassphraseRepository;
+import org.oss_tsukuba.service.TokenService;
 import org.oss_tsukuba.utils.CryptUtil;
 import org.oss_tsukuba.utils.Damm;
 import org.oss_tsukuba.utils.LogUtils;
@@ -22,8 +23,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestTemplate;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.Base64;
 import java.util.List;
@@ -34,17 +33,14 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class PassphraseController {
 
-	private RestTemplate restTemplate;
+	@Autowired
+	private TokenService tokenService;
+	
+	@Autowired
+	private PassphraseRepository passphraseRepository;
 
 	@Autowired
-	PassphraseRepository passphraseRepository;
-
-	@Autowired
-	ErrorRepository errorRepository;
-
-	public PassphraseController(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
+	private ErrorRepository errorRepository;
 
 	@GetMapping(path = "/")
 	public String getIndex(Model model) {
@@ -54,25 +50,9 @@ public class PassphraseController {
 
 	@GetMapping(path = "/passphrase")
 	public String getPassphrase(Principal principal, Model model) {
-		String url = "http://can3.canaly.co.jp:8080/auth/realms/gfarm_service/protocol/openid-connect/token";
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-		params.add("grant_type", "client_credentials");
-		params.add("client_secret", "8fe5eeb6-8cc5-478a-9aad-397a1cd621b2");
-		params.add("client_id", "jwt-saver");
-
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
-				headers);
-
-		ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
-
-		HttpStatus responseHttpStatus = result.getStatusCode();
-
-		if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
-			String jwt = result.getBody();
+		String jwt = tokenService.getToken(null);
+		
+		if (jwt != null) {
 			LogUtils.trace(jwt);
 
 			Damm dmm = new Damm();
@@ -99,12 +79,6 @@ public class PassphraseController {
 				}
 
 			}
-
-		} else if (responseHttpStatus.equals(HttpStatus.BAD_REQUEST)) {
-			// ステータスコード400の場合
-
-		} else if (responseHttpStatus.equals(HttpStatus.UNAUTHORIZED)) {
-			// ステータスコード401の場合
 		}
 
 		return "passphrase";
