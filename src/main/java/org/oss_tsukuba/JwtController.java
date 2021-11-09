@@ -38,6 +38,11 @@ public class JwtController {
 		String ipAddr = request.getRemoteAddr();
 		String hostname = request.getRemoteHost();
 		
+		if (hostname.equals(ipAddr)) {
+			// 名前が引けない場合は空文字列にする。
+			hostname = "";
+		}
+		
 		String jwt = "";
 
 		Damm damm = new Damm();
