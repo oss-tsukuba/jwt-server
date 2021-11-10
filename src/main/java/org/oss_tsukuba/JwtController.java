@@ -1,7 +1,10 @@
 package org.oss_tsukuba;
 
 import java.util.Base64;
+import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -26,12 +29,54 @@ import static org.oss_tsukuba.dao.Error.CHARACTER_ERROR;;
 @RestController
 public class JwtController {
 
+	class ErrorInfo {
+		long time;
+		int count;
+	}
+	
 	@Autowired
 	PassphraseRepository passphraseRepository;
 
 	@Autowired
 	ErrorRepository errorRepository;
+	
+	private Map<String, ErrorInfo> errorMap;
 
+	private long expireTime = 1000 * 60 * 60; // 1時間
+	
+	public JwtController() {
+		errorMap = new ConcurrentHashMap<String, ErrorInfo>();
+	}
+	
+	private int getIntervalTime(int count) {
+		return (count - 1) * (count - 1);
+	}
+	
+	private String error(String user) {
+		
+		ErrorInfo ei = errorMap.get(user);
+		long now = new Date().getTime();
+		
+		if (ei == null || now - ei.time > expireTime) {
+			ei = new ErrorInfo();
+			errorMap.put(user, ei);
+		}
+		
+		ei.time = now;
+		ei.count++;
+
+		int interval = getIntervalTime(ei.count);
+		
+		if (interval > 0) {
+			try {
+				Thread.sleep(interval * 1000);
+			} catch (InterruptedException e) {
+			}
+		}
+		
+		return null;
+	}
+	
 	@RequestMapping(value = "/jwt", method = RequestMethod.POST)
 	public String getJwt(@RequestParam(name = "user", required = true) String user,
 			@RequestParam(name = "pass", required = true) String pass, HttpServletRequest request) {
@@ -55,7 +100,7 @@ public class JwtController {
 			Error error = new Error(user, ipAddr, hostname, LENGTH_ERROR);
 			errorRepository.save(error);
 
-			return null;
+			return error(user);
 		}
 		
 		// 文字の検査
@@ -65,7 +110,7 @@ public class JwtController {
 			Error error = new Error(user, ipAddr, hostname, CHARACTER_ERROR);
 			errorRepository.save(error);
 
-			return null;
+			return error(user);
 		}
 		
 		// check digit の検査
@@ -75,7 +120,7 @@ public class JwtController {
 			Error error = new Error(user, ipAddr, hostname, CHECK_DIGIT_ERROR);
 			errorRepository.save(error);
 
-			return null;
+			return error(user);
 		}
 
 		// 復号化
@@ -91,9 +136,14 @@ public class JwtController {
 			Error error = new Error(user, ipAddr, hostname, DECRYPT_ERROR);
 			errorRepository.save(error);
 
-			return null;
+			return error(user);
 		}
 
+		// 認証成功で連続を削除
+		if (errorMap.containsKey(user)) {
+			errorMap.remove(user);
+		}
+		
 		return jwt;
 	}
 }
