@@ -11,19 +11,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "passphrases")
+@Table(name = "tokens")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Passphrase {
+public class Token {
 
 	@Id
 	@Column(name = "user")
 	private String user;
 
-	@Column(name = "phrase")
-	private String phrase;
+	@Column(name = "token")
+	private String token;
 	
 	@Column(name = "iv")
 	private String iv;

@@ -4,8 +4,8 @@ import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
-import org.oss_tsukuba.dao.Passphrase;
-import org.oss_tsukuba.dao.PassphraseRepository;
+import org.oss_tsukuba.dao.Token;
+import org.oss_tsukuba.dao.TokenRepository;
 import org.oss_tsukuba.service.TokenService;
 import org.oss_tsukuba.utils.CryptUtil;
 import org.oss_tsukuba.utils.Damm;
@@ -37,7 +37,7 @@ public class PassphraseController {
 	private TokenService tokenService;
 	
 	@Autowired
-	private PassphraseRepository passphraseRepository;
+	private TokenRepository passphraseRepository;
 
 	@Autowired
 	private ErrorRepository errorRepository;
@@ -72,7 +72,7 @@ public class PassphraseController {
 					try {
 						byte[] iv = CryptUtil.generateIV();
 						byte[] enc = CryptUtil.encrypt(jwt.getBytes(), key, iv);
-						passphraseRepository.save(new Passphrase(user, Base64.getEncoder().encodeToString(enc), Base64.getEncoder().encodeToString(iv)));
+						passphraseRepository.save(new Token(user, Base64.getEncoder().encodeToString(enc), Base64.getEncoder().encodeToString(iv)));
 					} catch (Exception e) {
 						LogUtils.error(e.toString(), e);
 					}

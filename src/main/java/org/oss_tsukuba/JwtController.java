@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
-import org.oss_tsukuba.dao.Passphrase;
-import org.oss_tsukuba.dao.PassphraseRepository;
+import org.oss_tsukuba.dao.Token;
+import org.oss_tsukuba.dao.TokenRepository;
 import org.oss_tsukuba.utils.CryptUtil;
 import org.oss_tsukuba.utils.Damm;
 import org.oss_tsukuba.utils.LogUtils;
@@ -35,7 +35,7 @@ public class JwtController {
 	}
 	
 	@Autowired
-	PassphraseRepository passphraseRepository;
+	TokenRepository passphraseRepository;
 
 	@Autowired
 	ErrorRepository errorRepository;
@@ -126,9 +126,9 @@ public class JwtController {
 		// 復号化
 		try {
 			String key = pass.substring(0, pass.length() - 1);
-			Optional<Passphrase> optional = passphraseRepository.findById(user);
-			Passphrase passphrase = optional.get();
-			byte[] enc = Base64.getDecoder().decode(passphrase.getPhrase());
+			Optional<Token> optional = passphraseRepository.findById(user);
+			Token passphrase = optional.get();
+			byte[] enc = Base64.getDecoder().decode(passphrase.getToken());
 			byte[] jwtByte = CryptUtil.decrypt(enc, key, Base64.getDecoder().decode(passphrase.getIv()));
 			jwt = new String(jwtByte);
 		} catch (Exception e) {
