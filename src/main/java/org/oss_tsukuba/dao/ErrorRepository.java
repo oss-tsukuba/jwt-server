@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ErrorRepository extends JpaRepository<Error, Integer>, JpaSpecificationExecutor<Error> {
 
-	public List<Error> findByUserOrderByIdDesc(String user);
+	public List<Error> findFirst20ByUserOrderByIdDesc(String user);
 
 }

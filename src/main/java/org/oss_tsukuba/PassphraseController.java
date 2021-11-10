@@ -92,7 +92,7 @@ public class PassphraseController {
 			if (obj instanceof KeycloakPrincipal<?>) {
 				KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
 				String user = keycloakPrincipal.getKeycloakSecurityContext().getIdToken().getPreferredUsername();
-				List<Error> errors = errorRepository.findByUserOrderByIdDesc(user);
+				List<Error> errors = errorRepository.findFirst20ByUserOrderByIdDesc(user);
 				model.addAttribute("errors", errors);
 			}
 		}
