@@ -11,6 +11,8 @@ import org.oss_tsukuba.utils.CryptUtil;
 import org.oss_tsukuba.utils.Damm;
 import org.oss_tsukuba.utils.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -85,15 +87,17 @@ public class PassphraseController {
 	}
 
 	@GetMapping(path = "/errors")
-	public String getErrros(Principal principal, Model model) {
+	public String getErrros(Principal principal, Model model, Pageable pageable) {
 		if (principal instanceof KeycloakAuthenticationToken) {
 			Object obj = ((KeycloakAuthenticationToken) principal).getPrincipal();
 
 			if (obj instanceof KeycloakPrincipal<?>) {
 				KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
 				String user = keycloakPrincipal.getKeycloakSecurityContext().getIdToken().getPreferredUsername();
-				List<Error> errors = errorRepository.findFirst20ByUserOrderByIdDesc(user);
-				model.addAttribute("errors", errors);
+				Page<Error> errors = errorRepository.findByUserOrderByIdDesc(pageable, user);
+		        model.addAttribute("page", errors);
+		        model.addAttribute("errors", errors.getContent());
+		        model.addAttribute("url", "errors");
 			}
 		}
 
