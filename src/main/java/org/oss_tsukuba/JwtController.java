@@ -49,7 +49,7 @@ public class JwtController {
 	}
 	
 	private int getIntervalTime(int count) {
-		return (count - 1) * (count - 1);
+		return count < 4? count: 4;
 	}
 	
 	private String error(String user) {
