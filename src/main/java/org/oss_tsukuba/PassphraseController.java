@@ -39,9 +39,6 @@ public class PassphraseController {
 	private TokenService tokenService;
 	
 	@Autowired
-	private TokenRepository passphraseRepository;
-
-	@Autowired
 	private ErrorRepository errorRepository;
 
 	@GetMapping(path = "/")
@@ -52,37 +49,8 @@ public class PassphraseController {
 
 	@GetMapping(path = "/passphrase")
 	public String getPassphrase(Principal principal, Model model) {
-		String jwt = tokenService.getToken(null);
+		tokenService.getToken(principal, model);
 		
-		if (jwt != null) {
-			LogUtils.trace(jwt);
-
-			Damm dmm = new Damm();
-
-			String key = dmm.getPassphrase();
-			String passphrase = key + dmm.damm32Encode(key.toCharArray());
-
-			model.addAttribute("passphrase", passphrase);
-
-			if (principal instanceof KeycloakAuthenticationToken) {
-				Object obj = ((KeycloakAuthenticationToken) principal).getPrincipal();
-
-				if (obj instanceof KeycloakPrincipal<?>) {
-					KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
-					String user = keycloakPrincipal.getKeycloakSecurityContext().getIdToken().getPreferredUsername();
-
-					try {
-						byte[] iv = CryptUtil.generateIV();
-						byte[] enc = CryptUtil.encrypt(jwt.getBytes(), key, iv);
-						passphraseRepository.save(new Token(user, Base64.getEncoder().encodeToString(enc), Base64.getEncoder().encodeToString(iv)));
-					} catch (Exception e) {
-						LogUtils.error(e.toString(), e);
-					}
-				}
-
-			}
-		}
-
 		return "passphrase";
 	}
 

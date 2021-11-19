@@ -1,8 +1,10 @@
 package org.oss_tsukuba.service;
 
-import java.util.Map;
+import java.security.Principal;
+
+import org.springframework.ui.Model;
 
 public interface TokenService {
 
-	String getToken(Map<String, String> params);
+	void getToken(Principal principal, Model model);
 }

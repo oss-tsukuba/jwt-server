@@ -1,13 +1,24 @@
 package org.oss_tsukuba.service;
 
-import java.util.Map;
+import java.security.Principal;
+import java.util.Base64;
 
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.oss_tsukuba.dao.Token;
+import org.oss_tsukuba.dao.TokenRepository;
+import org.oss_tsukuba.utils.CryptUtil;
+import org.oss_tsukuba.utils.Damm;
+import org.oss_tsukuba.utils.LogUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -17,34 +28,75 @@ public class TokenServiceImpl implements TokenService {
 
 	private RestTemplate restTemplate;
 
+	@Autowired
+	private TokenRepository passphraseRepository;
+
+	@Value("${keycloak.auth-server-url}")
+	private String baseUrl;
+	
+	@Value("${keycloak.realm}")
+	private String realm;
+	
+	@Value("${hpci.client}")
+	private String clientId;
+	
 	public TokenServiceImpl(RestTemplate restTemplate) {
 		super();
 		this.restTemplate = restTemplate;
 	}
 
 	@Override
-	public String getToken(Map<String, String> dummyParams) {
-		String url = "http://can3.canaly.co.jp:8080/auth/realms/gfarm_service/protocol/openid-connect/token";
+	public void getToken(Principal principal, Model model) {
+		String jwt = null;
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		if (principal instanceof KeycloakAuthenticationToken) {
+			Object obj = ((KeycloakAuthenticationToken) principal).getPrincipal();
 
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-		params.add("grant_type", "client_credentials");
-		params.add("client_secret", "8fe5eeb6-8cc5-478a-9aad-397a1cd621b2");
-		params.add("client_id", "jwt-saver");
+			if (obj instanceof KeycloakPrincipal<?>) {
+				KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
+				String user = keycloakPrincipal.getKeycloakSecurityContext().getIdToken().getPreferredUsername();
+				String token = keycloakPrincipal.getKeycloakSecurityContext().getTokenString();
 
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
-				headers);
+				String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 
-		ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+				headers.add("Authorization:",  "Bearer " + token);
+				MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+				params.add("grant_type", "urn:ietf:params:oauth:grant-type:uma-ticket");
+				params.add("audience", clientId);
 
-		HttpStatus responseHttpStatus = result.getStatusCode();
+				HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
+						params, headers);
 
-		if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
-			return result.getBody();
-		} else {
-			return null;
+				ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
+
+				HttpStatus responseHttpStatus = result.getStatusCode();
+
+				if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
+					jwt = result.getBody();
+				}
+
+				if (jwt != null) {
+					LogUtils.trace(jwt);
+
+					Damm dmm = new Damm();
+
+					String key = dmm.getPassphrase();
+					String passphrase = key + dmm.damm32Encode(key.toCharArray());
+
+					model.addAttribute("passphrase", passphrase);
+
+					try {
+						byte[] iv = CryptUtil.generateIV();
+						byte[] enc = CryptUtil.encrypt(jwt.getBytes(), key, iv);
+						passphraseRepository.save(new Token(user, Base64.getEncoder().encodeToString(enc),
+								Base64.getEncoder().encodeToString(iv)));
+					} catch (Exception e) {
+						LogUtils.error(e.toString(), e);
+					}
+				}
+			}
 		}
 	}
 }
