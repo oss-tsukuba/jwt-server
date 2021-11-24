@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Home</title>
+<title>Errors</title>
 <link th:href="@{webjars/bootstrap/5.1.2/css/bootstrap.min.css}"
 	rel="stylesheet" />
 <script th:href="@{webjars/jquery/3.6.0/js/jquery.min.js}"></script>
@@ -41,8 +41,8 @@
 			<div th:fragment='paginationbar'>
 				<ul>
 					<li th:class="${page.first} ? 'disabled':''"
-						style="display: inline"><span th:if="${page.first}">←先頭</span>
-						<a th:if="${not page.first}" th:href="@{${url}(page=0)}">←先頭</a></li>
+						style="display: inline"><span th:if="${page.first}">←First</span>
+						<a th:if="${not page.first}" th:href="@{${url}(page=0)}">←First</a></li>
 					<li th:each='i : ${#numbers.sequence(0, page.totalPages-1)}'
 						th:class="(${i}==${page.number})? 'active' : ''"
 						style="display: inline"><span th:if='${i}==${page.number}'
@@ -50,8 +50,8 @@
 						th:href="@{${url}(page=${i})}"> <span th:text='${i+1}'>1</span>
 					</a></li>
 					<li th:class="${page.last} ? 'disabled':''" style="display: inline">
-						<span th:if="${page.last}">末尾➝</span> <a th:if="${not page.last}"
-						th:href="@{${url}(page=(${page.totalPages}-1))}">末尾➝</a>
+						<span th:if="${page.last}">Last➝</span> <a th:if="${not page.last}"
+						th:href="@{${url}(page=(${page.totalPages}-1))}">Last➝</a>
 					</li>
 				</ul>
 			</div>

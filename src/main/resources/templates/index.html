@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Home</title>
+    <title>Menu</title>
     <link th:href="@{webjars/bootstrap/5.1.2/css/bootstrap.min.css}" rel="stylesheet"/>
     <script th:href="@{webjars/jquery/3.6.0/js/jquery.min.js}"></script>
     <script th:href="@{webjars/bootstrap/5.1.2/js/bootstrap.min.js}"></script>
@@ -12,24 +12,25 @@
 
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
     <main role="main" class="inner cover">
-        <h1 class="cover-heading">top</h1>
+        <h1 class="cover-heading">Menu</h1>
 
         <br>
 
 		<div>
-			<a class="btn-primary btn-lg btn-block" href="passphrase" role="button">パスフレーズ取得</a>
+			<a href="passphrase" role="button">パスフレーズ取得</a>
 		</div>	
 		
 		<br>
 		
 		<div>
-			<a class="btn-primary btn-lg" href="errors" role="button">認証エラー履歴</a>
+			<a href="errors" role="button">認証エラー履歴</a>
 		</div>
 		
 		<br>
+		<br>
 		
 		<div>
-			<a class="btn-info btn-lg" href="/logout" role="button">ログアウト</a>
+			<a class="btn btn-secondary" href="/logout" role="button">ログアウト</a>
         </div>
         
     </main>
