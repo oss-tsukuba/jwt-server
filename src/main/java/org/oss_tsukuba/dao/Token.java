@@ -3,6 +3,7 @@ package org.oss_tsukuba.dao;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "tokens")
+@IdClass(value=TokenKey.class)
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,8 +24,15 @@ public class Token {
 	@Column(name = "user")
 	private String user;
 
-	@Column(name = "token")
-	private String token;
+	@Id
+	@Column(name = "audience")
+	private String audience;
+	
+	@Column(name = "access_token")
+	private String accessToken;
+
+	@Column(name = "refresh_token")
+	private String refreshToken;
 	
 	@Column(name = "iv")
 	private String iv;

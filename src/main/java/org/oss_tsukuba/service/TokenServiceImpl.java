@@ -3,6 +3,9 @@ package org.oss_tsukuba.service;
 import java.security.Principal;
 import java.util.Base64;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.oss_tsukuba.dao.Token;
@@ -29,7 +32,7 @@ public class TokenServiceImpl implements TokenService {
 	private RestTemplate restTemplate;
 
 	@Autowired
-	private TokenRepository passphraseRepository;
+	private TokenRepository tokenRepository;
 
 	@Value("${keycloak.auth-server-url}")
 	private String baseUrl;
@@ -79,6 +82,17 @@ public class TokenServiceImpl implements TokenService {
 
 				if (jwt != null) {
 					LogUtils.trace(jwt);
+					
+					String accessToken = null;
+					String refreshToken = null;
+					
+					try {
+						JSONObject js = (JSONObject) new JSONParser().parse(jwt);
+						accessToken = (String) js.get("access_token");
+						refreshToken = (String) js.get("refresh_token");
+					} catch (ParseException e) {
+						LogUtils.error(e.toString(), e);
+					}
 
 					Damm dmm = new Damm();
 
@@ -89,8 +103,11 @@ public class TokenServiceImpl implements TokenService {
 
 					try {
 						byte[] iv = CryptUtil.generateIV();
-						byte[] enc = CryptUtil.encrypt(jwt.getBytes(), key, iv);
-						passphraseRepository.save(new Token(user, Base64.getEncoder().encodeToString(enc),
+						byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
+						byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
+
+						tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
+								Base64.getEncoder().encodeToString(enc2),
 								Base64.getEncoder().encodeToString(iv)));
 					} catch (Exception e) {
 						LogUtils.error(e.toString(), e);
