@@ -59,7 +59,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/css/**", "/img/**", "/js/**", "/jwt");
+		web.ignoring().antMatchers("/css/**", "/img/**", "/js/**", "/jwt", "/chpass");
 	}
 
 	@Override

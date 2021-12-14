@@ -128,22 +128,9 @@ public class JwtController {
 		return jwt;
 	}
 	
-	@RequestMapping(value = "/jwt", method = RequestMethod.POST)
-	public String getJwt(@RequestParam(name = "user", required = true) String user,
-			@RequestParam(name = "pass", required = true) String pass, HttpServletRequest request) {
-		String ipAddr = request.getRemoteAddr();
-		String hostname = request.getRemoteHost();
-		
-		if (hostname.equals(ipAddr)) {
-			// 名前が引けない場合は空文字列にする。
-			hostname = "";
-		}
-		
-		String accessToken = null;
-		
+	private String checkPassphrase(String user, String ipAddr, String hostname, char[] code) {
 		Damm damm = new Damm();
-		char[] code = pass.toCharArray();
-		
+
 		// 文字数の検査
 		if (!damm.isValidLength(code)) {
 			// error
@@ -172,6 +159,95 @@ public class JwtController {
 			errorRepository.save(error);
 
 			return error(user);
+		}
+		
+		return "ok";
+	}
+	
+	@RequestMapping(value = "/chpass", method = RequestMethod.POST)
+	public String changePassphrase(@RequestParam(name = "user", required = true) String user,
+			@RequestParam(name = "pass", required = true) String pass, HttpServletRequest request) {
+		String ipAddr = request.getRemoteAddr();
+		String hostname = request.getRemoteHost();
+		
+		if (hostname.equals(ipAddr)) {
+			// 名前が引けない場合は空文字列にする。
+			hostname = "";
+		}
+		
+		char[] code = pass.toCharArray();
+		
+		String ok = checkPassphrase(user, ipAddr, hostname, code);
+		
+		if (ok == null) {
+			return null;
+		}
+		
+		String newPassphrase = null;
+
+		// 復号化
+		try {
+			String key = pass.substring(0, pass.length() - 1);
+			Optional<Token> optional = tokenRepository.findById(new TokenKey(user, clientId));
+			Token passphrase = optional.get();
+			byte[] iv = Base64.getDecoder().decode(passphrase.getIv());
+			
+			// リフレッシュトークン
+			byte[] encRefresh = Base64.getDecoder().decode(passphrase.getRefreshToken());
+			byte[] byteRefresh = CryptUtil.decrypt(encRefresh, key, iv);
+			
+			// アクセストークン
+			byte[] encAccess = Base64.getDecoder().decode(passphrase.getAccessToken());
+			byte[] byteAccess = CryptUtil.decrypt(encAccess, key, iv);
+
+
+			Damm dmm = new Damm();
+
+			String newKey = dmm.getPassphrase();
+			newPassphrase = newKey + dmm.damm32Encode(newKey.toCharArray());
+
+			byte[] enc1 = CryptUtil.encrypt(byteAccess, newKey, iv);
+			byte[] enc2 = CryptUtil.encrypt(byteRefresh, newKey, iv);
+
+			tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
+					Base64.getEncoder().encodeToString(enc2),
+					Base64.getEncoder().encodeToString(iv)));
+
+		} catch (Exception e) {
+			LogUtils.error(e.toString(), e);
+			Error error = new Error(user, ipAddr, hostname, DECRYPT_ERROR);
+			errorRepository.save(error);
+
+			return error(user);
+		}
+
+		// 認証成功で連続を削除
+		if (errorMap.containsKey(user)) {
+			errorMap.remove(user);
+		}
+		
+		return newPassphrase;
+	}
+	
+	@RequestMapping(value = "/jwt", method = RequestMethod.POST)
+	public String getJwt(@RequestParam(name = "user", required = true) String user,
+			@RequestParam(name = "pass", required = true) String pass, HttpServletRequest request) {
+		String ipAddr = request.getRemoteAddr();
+		String hostname = request.getRemoteHost();
+		
+		if (hostname.equals(ipAddr)) {
+			// 名前が引けない場合は空文字列にする。
+			hostname = "";
+		}
+		
+		String accessToken = null;
+		
+		char[] code = pass.toCharArray();
+
+		String ok = checkPassphrase(user, ipAddr, hostname, code);
+		
+		if (ok == null) {
+			return null;
 		}
 
 		// 復号化
