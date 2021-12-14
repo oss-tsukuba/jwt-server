@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.oss_tsukuba.dao.Token;
 import org.oss_tsukuba.dao.TokenRepository;
@@ -40,7 +41,7 @@ public class TokenServiceImpl implements TokenService {
 	@Value("${keycloak.realm}")
 	private String realm;
 	
-	@Value("${hpci.client}")
+	@Value("${keycloak.resource}")
 	private String clientId;
 	
 	public TokenServiceImpl(RestTemplate restTemplate) {
@@ -58,16 +59,16 @@ public class TokenServiceImpl implements TokenService {
 			if (obj instanceof KeycloakPrincipal<?>) {
 				KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
 				String user = keycloakPrincipal.getKeycloakSecurityContext().getIdToken().getPreferredUsername();
-				String token = keycloakPrincipal.getKeycloakSecurityContext().getTokenString();
+				String rToken = ((RefreshableKeycloakSecurityContext)keycloakPrincipal.getKeycloakSecurityContext()).getRefreshToken();
 
 				String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 
 				HttpHeaders headers = new HttpHeaders();
 				headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-				headers.add("Authorization:",  "Bearer " + token);
 				MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-				params.add("grant_type", "urn:ietf:params:oauth:grant-type:uma-ticket");
-				params.add("audience", clientId);
+				params.add("grant_type", "refresh_token");
+				params.add("client_id", clientId);
+				params.add("refresh_token", rToken);
 
 				HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
 						params, headers);

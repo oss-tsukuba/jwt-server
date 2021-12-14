@@ -61,7 +61,7 @@ public class JwtController {
 	@Value("${keycloak.realm}")
 	private String realm;
 	
-	@Value("${hpci.client}")
+	@Value("${keycloak.resource}")
 	private String clientId;
 	
 	private Map<String, ErrorInfo> errorMap;
@@ -111,10 +111,8 @@ public class JwtController {
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 		params.add("grant_type", "refresh_token");
-//		params.add("client_id", clientId);
-		params.add("client_id", "jwt-server");
+		params.add("client_id", clientId);
 		params.add("refresh_token", refreshToken);
-//		params.add("client_secret", "bd1a47f4-3274-48cc-a349-06611ca95a64");
 		
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
 				params, headers);
