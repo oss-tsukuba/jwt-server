@@ -67,15 +67,15 @@ public class Error {
 	public String getError() {
 		switch (type) {
 		case CHECK_DIGIT_ERROR:
-			return "check digit エラー";
+			return "check digit";
 		case DECRYPT_ERROR:
-			return "復号化エラー";
+			return "decrypt";
 		case LENGTH_ERROR:
-			return "文字数エラー";
+			return "character count";
 		case CHARACTER_ERROR:
-			return "文字エラー";
+			return "character";
 		}
 
-		return "その他";
+		return "others";
 	}
 }

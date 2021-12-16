@@ -171,7 +171,6 @@ public class JwtController {
 		String hostname = request.getRemoteHost();
 		
 		if (hostname.equals(ipAddr)) {
-			// 名前が引けない場合は空文字列にする。
 			hostname = "";
 		}
 		
@@ -185,18 +184,18 @@ public class JwtController {
 		
 		String newPassphrase = null;
 
-		// 復号化
+		// decrypt
 		try {
 			String key = pass.substring(0, pass.length() - 1);
 			Optional<Token> optional = tokenRepository.findById(new TokenKey(user, clientId));
 			Token passphrase = optional.get();
 			byte[] iv = Base64.getDecoder().decode(passphrase.getIv());
 			
-			// リフレッシュトークン
+			// refresh token
 			byte[] encRefresh = Base64.getDecoder().decode(passphrase.getRefreshToken());
 			byte[] byteRefresh = CryptUtil.decrypt(encRefresh, key, iv);
 			
-			// アクセストークン
+			// access token
 			byte[] encAccess = Base64.getDecoder().decode(passphrase.getAccessToken());
 			byte[] byteAccess = CryptUtil.decrypt(encAccess, key, iv);
 
@@ -221,7 +220,7 @@ public class JwtController {
 			return error(user);
 		}
 
-		// 認証成功で連続を削除
+		// Auth Success
 		if (errorMap.containsKey(user)) {
 			errorMap.remove(user);
 		}
@@ -250,14 +249,14 @@ public class JwtController {
 			return null;
 		}
 
-		// 復号化
+		// decrypt
 		try {
 			String key = pass.substring(0, pass.length() - 1);
 			Optional<Token> optional = tokenRepository.findById(new TokenKey(user, clientId));
 			Token passphrase = optional.get();
 			byte[] iv = Base64.getDecoder().decode(passphrase.getIv());
 			
-			// リフレッシュトークン
+			// refresh token
 			byte[] encRefresh = Base64.getDecoder().decode(passphrase.getRefreshToken());
 			byte[] byteRefresh = CryptUtil.decrypt(encRefresh, key, iv);
 			String refreshToken = new String(byteRefresh);
@@ -291,7 +290,7 @@ public class JwtController {
 			return error(user);
 		}
 
-		// 認証成功で連続を削除
+		// Auth Success
 		if (errorMap.containsKey(user)) {
 			errorMap.remove(user);
 		}

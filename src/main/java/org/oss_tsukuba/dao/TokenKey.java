@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class TokenKey implements Serializable {
 	
 	/**
-	 * シリアル
+	 * Serial
 	 */
 	private static final long serialVersionUID = 3771474388079967512L;
 

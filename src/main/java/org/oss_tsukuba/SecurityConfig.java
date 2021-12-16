@@ -32,7 +32,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 		this.keycloakClientRequestFactory = keycloakClientRequestFactory;
 	}
 
-	// RestTemplateにかわってインジェクトされるようにする
+	// RestTemplate Injection
 	@Bean
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public RestTemplate restTemplate() {
