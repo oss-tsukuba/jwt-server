@@ -37,7 +37,8 @@ import org.springframework.web.client.RestTemplate;
 import static org.oss_tsukuba.dao.Error.CHECK_DIGIT_ERROR;
 import static org.oss_tsukuba.dao.Error.DECRYPT_ERROR;
 import static org.oss_tsukuba.dao.Error.LENGTH_ERROR;
-import static org.oss_tsukuba.dao.Error.CHARACTER_ERROR;;
+import static org.oss_tsukuba.dao.Error.CHARACTER_ERROR;
+import static org.oss_tsukuba.dao.Error.EXPIRED_ERROR;
 
 @RestController
 public class JwtController {
@@ -281,6 +282,11 @@ public class JwtController {
 				} catch (Exception e) {
 					LogUtils.error(e.toString(), e);
 				}
+			} else {
+				Error error = new Error(user, ipAddr, hostname, EXPIRED_ERROR);
+				errorRepository.save(error);
+
+				return error(user);
 			}
 		} catch (Exception e) {
 			LogUtils.error(e.toString(), e);

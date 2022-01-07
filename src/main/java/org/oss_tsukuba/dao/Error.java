@@ -29,6 +29,8 @@ public class Error {
 	
 	public static final int CHARACTER_ERROR = 3;
 	
+	public static final int EXPIRED_ERROR = 4;
+
 	@Id
 	@Column(name = "id")
 	private int id;
@@ -74,6 +76,8 @@ public class Error {
 			return "character count";
 		case CHARACTER_ERROR:
 			return "character";
+		case EXPIRED_ERROR:
+			return "expired";
 		}
 
 		return "others";
