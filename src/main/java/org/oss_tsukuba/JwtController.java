@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.oss_tsukuba.dao.Error.CHECK_DIGIT_ERROR;
@@ -118,12 +119,16 @@ public class JwtController {
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
 				params, headers);
 
-		ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
-
-		HttpStatus responseHttpStatus = result.getStatusCode();
-
-		if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
-			jwt = result.getBody();
+		try {
+			ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
+	
+			HttpStatus responseHttpStatus = result.getStatusCode();
+	
+			if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
+				jwt = result.getBody();
+			}
+		} catch (HttpClientErrorException e) {
+			LogUtils.error(e.toString(), e);
 		}
 
 		return jwt;
