@@ -66,6 +66,9 @@ public class JwtController {
 	@Value("${keycloak.resource}")
 	private String clientId;
 	
+	@Value("${keycloak.credentials.secret}")
+	private String secret;
+	
 	private Map<String, ErrorInfo> errorMap;
 
 	private long expireTime = 1000 * 60 * 60; // 1時間
@@ -115,7 +118,8 @@ public class JwtController {
 		params.add("grant_type", "refresh_token");
 		params.add("client_id", clientId);
 		params.add("refresh_token", refreshToken);
-		
+		params.add("client_secret", secret);
+
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
 				params, headers);
 

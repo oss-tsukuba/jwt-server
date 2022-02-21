@@ -44,6 +44,9 @@ public class TokenServiceImpl implements TokenService {
 	@Value("${keycloak.resource}")
 	private String clientId;
 	
+	@Value("${keycloak.credentials.secret}")
+	private String secret;
+	
 	public TokenServiceImpl(RestTemplate restTemplate) {
 		super();
 		this.restTemplate = restTemplate;
@@ -69,7 +72,7 @@ public class TokenServiceImpl implements TokenService {
 				params.add("grant_type", "refresh_token");
 				params.add("client_id", clientId);
 				params.add("refresh_token", rToken);
-
+				params.add("client_secret", secret);
 				HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
 						params, headers);
 
