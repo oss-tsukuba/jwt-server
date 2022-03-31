@@ -26,7 +26,7 @@ public class PassphraseController {
 	@Autowired
 	private ErrorRepository errorRepository;
 
-	@GetMapping(path = "/")
+	@GetMapping(path = "/index")
 	public String getIndex(Model model) {
 
 		return "index";
