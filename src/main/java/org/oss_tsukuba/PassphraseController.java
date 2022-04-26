@@ -62,4 +62,10 @@ public class PassphraseController {
 		request.logout();
 		return "redirect:/";
 	}
+	
+	@GetMapping(path = "/error")
+	public String getError(Model model) {
+
+		return "error";
+	}
 }
