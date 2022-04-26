@@ -32,6 +32,12 @@ public class PassphraseController {
 		return "index";
 	}
 
+	@GetMapping(path = "/menu")
+	public String getMenu(Model model) {
+
+		return "menu";
+	}
+	
 	@GetMapping(path = "/passphrase")
 	public String getPassphrase(Principal principal, Model model) {
 		tokenService.getToken(principal, model);
@@ -60,11 +66,12 @@ public class PassphraseController {
 	@GetMapping(path = "/logout")
 	public String logout(HttpServletRequest request) throws ServletException {
 		request.logout();
-		return "redirect:/";
+		return "index";
 	}
 	
 	@GetMapping(path = "/error")
-	public String getError(Model model) {
+	public String getError(HttpServletRequest request) throws ServletException {
+		request.logout();
 
 		return "error";
 	}

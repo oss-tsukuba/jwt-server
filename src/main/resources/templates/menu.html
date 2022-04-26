@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Index</title>
+    <title>Menu</title>
     <link th:href="@{webjars/bootstrap/5.1.2/css/bootstrap.min.css}" rel="stylesheet"/>
     <script th:href="@{webjars/jquery/3.6.0/js/jquery.min.js}"></script>
     <script th:href="@{webjars/bootstrap/5.1.2/js/bootstrap.min.js}"></script>
@@ -12,13 +12,25 @@
 
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
     <main role="main" class="inner cover">
-        <h1 class="cover-heading">JWT-SERVER</h1>
-        
+        <h1 class="cover-heading">Menu</h1>
+
         <br>
-        <br>
+
+		<div>
+			<a href="passphrase" role="button">Passphrase</a>
+		</div>	
+		
+		<br>
 		
 		<div>
-			<a class="btn btn-primary" href="menu" role="button">Login</a>
+			<a href="errors" role="button">Authentication Errors</a>
+		</div>
+		
+		<br>
+		<br>
+		
+		<div>
+			<a class="btn btn-secondary" href="logout" role="button">Logout</a>
         </div>
         
     </main>
