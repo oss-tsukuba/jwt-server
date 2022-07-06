@@ -5,6 +5,7 @@ import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
 import org.oss_tsukuba.service.TokenService;
+import org.oss_tsukuba.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,18 +48,11 @@ public class PassphraseController {
 
 	@GetMapping(path = "/errors")
 	public String getErrros(Principal principal, Model model, Pageable pageable) {
-		if (principal instanceof KeycloakAuthenticationToken) {
-			Object obj = ((KeycloakAuthenticationToken) principal).getPrincipal();
-
-			if (obj instanceof KeycloakPrincipal<?>) {
-				KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
-				String user = keycloakPrincipal.getKeycloakSecurityContext().getIdToken().getPreferredUsername();
-				Page<Error> errors = errorRepository.findByUserOrderByIdDesc(pageable, user);
-		        model.addAttribute("page", errors);
-		        model.addAttribute("errors", errors.getContent());
-		        model.addAttribute("url", "errors");
-			}
-		}
+		String user = KeycloakUtil.getUserName(principal);
+		Page<Error> errors = errorRepository.findByUserOrderByIdDesc(pageable, user);
+        model.addAttribute("page", errors);
+        model.addAttribute("errors", errors.getContent());
+        model.addAttribute("url", "errors");
 
 		return "errors";
 	}

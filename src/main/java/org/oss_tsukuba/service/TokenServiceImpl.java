@@ -13,6 +13,7 @@ import org.oss_tsukuba.dao.Token;
 import org.oss_tsukuba.dao.TokenRepository;
 import org.oss_tsukuba.utils.CryptUtil;
 import org.oss_tsukuba.utils.Damm;
+import org.oss_tsukuba.utils.KeycloakUtil;
 import org.oss_tsukuba.utils.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,7 +62,7 @@ public class TokenServiceImpl implements TokenService {
 
 			if (obj instanceof KeycloakPrincipal<?>) {
 				KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
-				String user = keycloakPrincipal.getKeycloakSecurityContext().getIdToken().getPreferredUsername();
+				String user = KeycloakUtil.getUserName(principal);
 				String rToken = ((RefreshableKeycloakSecurityContext)keycloakPrincipal.getKeycloakSecurityContext()).getRefreshToken();
 
 				String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
