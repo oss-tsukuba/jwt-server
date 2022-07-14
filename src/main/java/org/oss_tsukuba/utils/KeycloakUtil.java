@@ -9,9 +9,7 @@ import org.keycloak.representations.AccessToken;
 
 public class KeycloakUtil {
 
-	public static String USER_CLAIM = "hpci.id";
-	
-	public static String getUserName(Principal principal) {
+	public static String getUserName(Principal principal, String userClaim) {
 		String user = null;
 		
 		if (principal instanceof KeycloakAuthenticationToken) {
@@ -20,8 +18,13 @@ public class KeycloakUtil {
 			if (obj instanceof KeycloakPrincipal<?>) {
 				KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
 				AccessToken token = keycloakPrincipal.getKeycloakSecurityContext().getToken();
-				Map<String, Object> map = token.getOtherClaims();
-				user = (String) map.get(USER_CLAIM);
+				
+				if ("".equals(userClaim)) {
+					user = token.getPreferredUsername();
+				} else {
+					Map<String, Object> map = token.getOtherClaims();
+					user = (String) map.get(userClaim);
+				}
 			}
 		}
 		

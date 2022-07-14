@@ -1,12 +1,11 @@
 package org.oss_tsukuba;
 
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
 import org.oss_tsukuba.service.TokenService;
 import org.oss_tsukuba.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -27,6 +26,9 @@ public class PassphraseController {
 	@Autowired
 	private ErrorRepository errorRepository;
 
+	@Value("${user-claim:}")
+	private String userClaim;
+	
 	@GetMapping(path = "/index")
 	public String getIndex(Model model) {
 
@@ -48,7 +50,7 @@ public class PassphraseController {
 
 	@GetMapping(path = "/errors")
 	public String getErrros(Principal principal, Model model, Pageable pageable) {
-		String user = KeycloakUtil.getUserName(principal);
+		String user = KeycloakUtil.getUserName(principal, userClaim);
 		Page<Error> errors = errorRepository.findByUserOrderByIdDesc(pageable, user);
         model.addAttribute("page", errors);
         model.addAttribute("errors", errors.getContent());

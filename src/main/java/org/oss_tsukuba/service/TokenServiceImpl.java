@@ -48,6 +48,9 @@ public class TokenServiceImpl implements TokenService {
 	@Value("${keycloak.credentials.secret}")
 	private String secret;
 	
+	@Value("${user-claim:}")
+	private String userClaim;
+	
 	public TokenServiceImpl(RestTemplate restTemplate) {
 		super();
 		this.restTemplate = restTemplate;
@@ -62,7 +65,7 @@ public class TokenServiceImpl implements TokenService {
 
 			if (obj instanceof KeycloakPrincipal<?>) {
 				KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
-				String user = KeycloakUtil.getUserName(principal);
+				String user = KeycloakUtil.getUserName(principal, userClaim);
 				String rToken = ((RefreshableKeycloakSecurityContext)keycloakPrincipal.getKeycloakSecurityContext()).getRefreshToken();
 
 				String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
