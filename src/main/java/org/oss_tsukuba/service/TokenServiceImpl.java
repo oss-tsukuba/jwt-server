@@ -108,7 +108,8 @@ public class TokenServiceImpl implements TokenService {
 					String passphrase = key + dmm.damm32Encode(key.toCharArray());
 
 					model.addAttribute("passphrase", passphrase);
-
+					model.addAttribute("user", user);
+					
 					try {
 						byte[] iv = CryptUtil.generateIV();
 						byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
