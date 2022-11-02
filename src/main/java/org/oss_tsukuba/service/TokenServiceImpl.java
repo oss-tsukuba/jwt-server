@@ -38,19 +38,19 @@ public class TokenServiceImpl implements TokenService {
 
 	@Value("${keycloak.auth-server-url}")
 	private String baseUrl;
-	
+
 	@Value("${keycloak.realm}")
 	private String realm;
-	
+
 	@Value("${keycloak.resource}")
 	private String clientId;
-	
+
 	@Value("${keycloak.credentials.secret}")
 	private String secret;
-	
+
 	@Value("${user-claim:}")
 	private String userClaim;
-	
+
 	public TokenServiceImpl(RestTemplate restTemplate) {
 		super();
 		this.restTemplate = restTemplate;
@@ -66,7 +66,8 @@ public class TokenServiceImpl implements TokenService {
 			if (obj instanceof KeycloakPrincipal<?>) {
 				KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
 				String user = KeycloakUtil.getUserName(principal, userClaim);
-				String rToken = ((RefreshableKeycloakSecurityContext)keycloakPrincipal.getKeycloakSecurityContext()).getRefreshToken();
+				String rToken = ((RefreshableKeycloakSecurityContext) keycloakPrincipal.getKeycloakSecurityContext())
+						.getRefreshToken();
 
 				String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 
@@ -90,10 +91,10 @@ public class TokenServiceImpl implements TokenService {
 
 				if (jwt != null) {
 					LogUtils.trace(jwt);
-					
+
 					String accessToken = null;
 					String refreshToken = null;
-					
+
 					try {
 						JSONObject js = (JSONObject) new JSONParser().parse(jwt);
 						accessToken = (String) js.get("access_token");
@@ -109,20 +110,80 @@ public class TokenServiceImpl implements TokenService {
 
 					model.addAttribute("passphrase", passphrase);
 					model.addAttribute("user", user);
-					
+
 					try {
 						byte[] iv = CryptUtil.generateIV();
 						byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
 						byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
 
 						tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
-								Base64.getEncoder().encodeToString(enc2),
-								Base64.getEncoder().encodeToString(iv)));
+								Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
 					} catch (Exception e) {
 						LogUtils.error(e.toString(), e);
 					}
 				}
 			}
 		}
+	}
+
+	@Override
+	public String getToken(String user, String pass) {
+		String jwt = null;
+
+		String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("grant_type", "password");
+		params.add("client_id", clientId);
+		params.add("username", user);
+		params.add("password", pass);
+		params.add("client_secret", secret);
+		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
+				headers);
+
+		ResponseEntity<String> result = new RestTemplate().postForEntity(url, request, String.class);
+
+		HttpStatus responseHttpStatus = result.getStatusCode();
+
+		if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
+			jwt = result.getBody();
+		}
+
+		if (jwt != null) {
+			LogUtils.trace(jwt);
+
+			String accessToken = null;
+			String refreshToken = null;
+
+			try {
+				JSONObject js = (JSONObject) new JSONParser().parse(jwt);
+				accessToken = (String) js.get("access_token");
+				refreshToken = (String) js.get("refresh_token");
+			} catch (ParseException e) {
+				LogUtils.error(e.toString(), e);
+			}
+
+			Damm dmm = new Damm();
+
+			String key = dmm.getPassphrase();
+			String passphrase = key + dmm.damm32Encode(key.toCharArray());
+
+			try {
+				byte[] iv = CryptUtil.generateIV();
+				byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
+				byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
+
+				tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
+						Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
+			} catch (Exception e) {
+				LogUtils.error(e.toString(), e);
+			}
+
+			return passphrase;
+		}
+
+		return null;
 	}
 }

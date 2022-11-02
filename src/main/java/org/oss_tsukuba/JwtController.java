@@ -16,6 +16,7 @@ import org.oss_tsukuba.dao.ErrorRepository;
 import org.oss_tsukuba.dao.Token;
 import org.oss_tsukuba.dao.TokenKey;
 import org.oss_tsukuba.dao.TokenRepository;
+import org.oss_tsukuba.service.TokenService;
 import org.oss_tsukuba.utils.CryptUtil;
 import org.oss_tsukuba.utils.Damm;
 import org.oss_tsukuba.utils.LogUtils;
@@ -57,6 +58,9 @@ public class JwtController {
 	@Autowired
 	ErrorRepository errorRepository;
 	
+	@Autowired
+	private TokenService tokenService;
+
 	@Value("${keycloak.auth-server-url}")
 	private String baseUrl;
 	
@@ -69,6 +73,11 @@ public class JwtController {
 	@Value("${keycloak.credentials.secret}")
 	private String secret;
 	
+	@Value("${jwt-server.passphrase:}")
+	private String initialPassphrase;
+
+	private boolean initPassphrase;
+
 	private Map<String, ErrorInfo> errorMap;
 
 	private long expireTime = 1000 * 60 * 60; // 1時間
@@ -76,6 +85,7 @@ public class JwtController {
 	public JwtController() {
 		errorMap = new ConcurrentHashMap<String, ErrorInfo>();
 		this.restTemplate = new RestTemplate();
+		this.initPassphrase = false;
 	}
 	
 	private int getIntervalTime(int count) {
@@ -172,6 +182,39 @@ public class JwtController {
 		}
 		
 		return "ok";
+	}
+	
+	@RequestMapping(value = "/init_jwt", method = RequestMethod.POST)
+	public String initJwt(@RequestParam(name = "passphrase", required = true) String passphrase,
+			@RequestParam(name = "user", required = true) String user,
+			@RequestParam(name = "password", required = true) String password, HttpServletRequest request) {
+		String ipAddr = request.getRemoteAddr();
+		String hostname = request.getRemoteHost();
+		
+		if (initPassphrase || "".equals(initialPassphrase)) {
+			return null;
+		}
+		
+		char[] code = passphrase.toCharArray();
+	
+		String ok = checkPassphrase(user, ipAddr, hostname, code);
+		
+		if (ok == null) {
+			return null;
+		}
+
+		if (passphrase.equals(initialPassphrase)) {
+			String newPassphrase = tokenService.getToken(user, password);
+			
+			if (newPassphrase != null) {
+
+				initPassphrase = true;
+				
+				return newPassphrase;
+			}
+		}
+		
+		return null;
 	}
 	
 	@RequestMapping(value = "/chpass", method = RequestMethod.POST)
