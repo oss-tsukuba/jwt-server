@@ -61,7 +61,7 @@ public class JwtController {
 	@Autowired
 	private TokenService tokenService;
 
-	@Value("${keycloak.auth-server-url}")
+	@Value("${token-url}")
 	private String baseUrl;
 	
 	@Value("${keycloak.realm}")

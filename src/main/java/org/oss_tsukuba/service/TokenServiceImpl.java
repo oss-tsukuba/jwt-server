@@ -36,7 +36,7 @@ public class TokenServiceImpl implements TokenService {
 	@Autowired
 	private TokenRepository tokenRepository;
 
-	@Value("${keycloak.auth-server-url}")
+	@Value("${token-url}")
 	private String baseUrl;
 
 	@Value("${keycloak.realm}")
