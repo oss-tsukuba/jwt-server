@@ -151,7 +151,7 @@ public class OAuthRequestAuthenticator {
             }
             KeycloakUriBuilder secureUrl = KeycloakUriBuilder.fromUri(url).scheme("https").port(-1);
             if (port != 443) secureUrl.port(port);
-            url = secureUrl.build().toString();
+            url = secureUrl.buildAsString();
         }
 
         String loginHint = getQueryParamValue("login_hint");
@@ -197,7 +197,7 @@ public class OAuthRequestAuthenticator {
         scope = TokenUtil.attachOIDCScope(scope);
         redirectUriBuilder.queryParam(OAuth2Constants.SCOPE, scope);
 
-        return redirectUriBuilder.build().toString();
+        return redirectUriBuilder.buildAsString();
     }
 
     protected int sslRedirectPort() {
@@ -226,7 +226,7 @@ public class OAuthRequestAuthenticator {
                 tokenStore.saveRequest();
                 log.debug("Sending redirect to login page: " + redirect);
                 exchange.getResponse().setStatus(302);
-                exchange.getResponse().setCookie(deployment.getStateCookieName(), state, /* need to set path? */ null, null, -1, deployment.getSslRequired().isRequired(facade.getRequest().getRemoteAddr()), true);
+                exchange.getResponse().setCookie(deployment.getStateCookieName(), state, "/", null, -1, deployment.getSslRequired().isRequired(facade.getRequest().getRemoteAddr()), true);
                 exchange.getResponse().setHeader("Location", redirect);
                 return true;
             }
@@ -327,16 +327,16 @@ public class OAuthRequestAuthenticator {
         if (challenge != null) return challenge;
 
         AccessTokenResponse tokenResponse = null;
-        strippedOauthParametersRequestUri = stripOauthParametersFromRedirect();
+        strippedOauthParametersRequestUri = rewrittenRedirectUri(stripOauthParametersFromRedirect());
     
         try {
             // For COOKIE store we don't have httpSessionId and single sign-out won't be available
             String httpSessionId = deployment.getTokenStore() == TokenStore.SESSION ? reqAuthenticator.changeHttpSessionId(true) : null;
-            tokenResponse = ServerRequest.invokeAccessCodeToToken(deployment, code, rewrittenRedirectUri(strippedOauthParametersRequestUri), httpSessionId);
+            tokenResponse = ServerRequest.invokeAccessCodeToToken(deployment, code, strippedOauthParametersRequestUri, httpSessionId);
         } catch (ServerRequest.HttpFailure failure) {
             log.error("failed to turn code into token");
             log.error("status from server: " + failure.getStatus());
-            if (failure.getError() != null) {
+            if (failure.getError() != null && !failure.getError().trim().isEmpty()) {
                 log.error("   " + failure.getError());
             }
             return challenge(403, OIDCAuthenticationError.Reason.CODE_TO_TOKEN_FAILURE, null);
@@ -358,9 +358,10 @@ public class OAuthRequestAuthenticator {
         }
 
         try {
-        	log.error("tokenString:" + tokenString);
-        	log.error("idTokenString:" + idTokenString);
             AdapterTokenVerifier.VerifiedTokens tokens = AdapterTokenVerifier.verifyTokens(tokenString, idTokenString, deployment);
+            log.error("tokenString:" + tokenString);
+            log.error("idTokenString:" + idTokenString);
+
             token = tokens.getAccessToken();
             idToken = tokens.getIdToken();
             log.debug("Token Verification succeeded!");
@@ -387,7 +388,7 @@ public class OAuthRequestAuthenticator {
                 .replaceQueryParam(OAuth2Constants.CODE, null)
                 .replaceQueryParam(OAuth2Constants.STATE, null)
                 .replaceQueryParam(OAuth2Constants.SESSION_STATE, null);
-        return builder.build().toString();
+        return builder.buildAsString();
     }
     
     private String rewrittenRedirectUri(String originalUri) {
