@@ -29,10 +29,16 @@ public class PassphraseController {
 	@Value("${user-claim:}")
 	private String userClaim;
 	
+	@GetMapping(path = "/")
+	public String getRoot(Model model) {
+
+		return "redirect:menu";
+	}
+	
 	@GetMapping(path = "/index")
 	public String getIndex(Model model) {
 
-		return "index";
+		return "redirect:menu";
 	}
 
 	@GetMapping(path = "/menu")
