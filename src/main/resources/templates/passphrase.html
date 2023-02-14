@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>Passphrase</title>
+    <link th:href="@{css/common2.css}" rel="stylesheet" />
+    <link th:href="@{css/index.css}" rel="stylesheet" />    
     <link th:href="@{webjars/bootstrap/5.1.2/css/bootstrap.min.css}" rel="stylesheet"/>
     <script th:href="@{webjars/jquery/3.6.0/js/jquery.min.js}"></script>
     <script th:href="@{webjars/bootstrap/5.1.2/js/bootstrap.min.js}"></script>
@@ -15,12 +17,17 @@
         <h1 class="cover-heading">Passphrase</h1>
 
  		<br>
+ 		<br>
+ 		
  		<span class="h2">user : </span> <span class="h2" th:text="${user}"></span>
  		
  		<br>
+ 		<br>
  		
-        <p class="h1" th:text="${passphrase}"></p>
-
+ 		<div class="box13">
+        <p class="h1 passphrase" th:text="${passphrase}"></p>
+        </div>
+        
 		<br>
 		
         <a href="menu">back</a>

@@ -1,0 +1,60 @@
+@charset "UTF-8";
+
+/*============================================
+トップページ
+============================================*/
+#index .block{
+  padding:22px 0 20px 45px;
+}
+
+#index .menu ul{
+  overflow:hidden;
+}
+
+#index .menu li{
+  width:415px;
+  float:left;
+}
+
+#index .menu li.btn{
+  margin:0 12px 12px 0;
+  background-color:#008cc1;
+  border-radius:8px;
+}
+
+#index .menu li.btn:hover{
+  opacity:0.7;
+}
+
+#index .menu li.btn a{
+  display: table-cell;
+  vertical-align: middle;
+  padding:20px 28px 20px 72px;
+  color:#fff;
+  font-size:24px;
+  font-weight:lighter;
+  line-height:1.25;
+}
+
+#index .menu li.btn a:hover{
+  text-decoration:none;
+}
+
+#index .menu li.btn sup{
+  font-size:12px;
+}
+
+#index .menu li.triple a{
+  height:90px;
+  line-height:30px;
+}
+
+
+
+p.sample {
+  line-height:20px;
+  font-size:12px;
+  font: bold;
+
+}
+

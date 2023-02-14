@@ -1,0 +1,138 @@
+@charset "UTF-8";
+
+/*============================================
+reset
+============================================*/
+*{
+  font-family:"Hiragino Kaku Gothic ProN","ヒラギノ角ゴ ProN","メイリオ",Meiryo,sans-serif;
+}
+
+html,body,div,ul,li,p,h1,h2,h3,h4,dl,dt,dd{
+  margin:0;
+  padding:0;
+}
+
+body{
+  width:100%;
+}
+
+ul,li{list-style:none;}
+
+/*============================================
+装飾
+============================================*/
+a{
+  color:#008cc1;
+  text-decoration:none;
+}
+
+a:hover{text-decoration:underline;}
+
+h1{
+  display:inline-block;
+  margin-bottom:15px;
+  font-size:30px;
+  border-bottom:solid 4px #008cc1;
+}
+
+h2{
+  margin-bottom:5px;
+  line-height:1.0;
+  font-size:16px;
+}
+
+h3{
+  margin-bottom:18px;
+  line-height:1.0;
+  font-size:20px;
+  color:#008cc1;
+  text-indent:-12px;
+}
+
+h4{
+  margin-bottom:10px;
+  font-size:14px;
+  font-weight:bold;
+}
+
+sup{line-height:1.0;}
+
+.caption{font-size:12px;}
+
+.symbol{font-family:"Osaka−等幅","courier new","courier","ＭＳ ゴシック","monospace";}
+
+/* エラーメッセージの文字色 */
+.errcolor { color:red; }
+
+/*============================================
+共通
+============================================*/
+.header{
+  width:100%;
+  height:68px;
+  margin-bottom:50px;
+  background-color:#008cc1;
+  border-top:solid 3px #004d92;
+}
+
+.head_inner{
+  width:932px;
+  margin:auto;
+}
+
+.head_inner img{display:block;}
+
+.breadcrumb{
+  background-color:#fff;
+  border-bottom:solid 1px #efefef;
+}
+
+.breadcrumb li{
+  display:inline;
+  font-size:12px;
+  color:#505050;
+  line-height:24px;
+}
+
+.breadcrumb .thispage{
+  color:#000;
+  font-weight:bold;
+}
+
+.content{
+  width:932px;
+  margin:0 auto 60px;
+}
+
+.lang{
+  display:inline-block;
+  margin-top:15px;
+  float:right;
+  font-size:14px;
+}
+
+.block{
+  background:rgba(255,255,255,0.5);
+  border:solid 3px #fff;
+  border-radius:5px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.3);
+}
+
+summary {
+	font-size: xx-large;
+}
+
+.box13 {
+    padding: 0.5em 1em;
+    margin:  0 auto;
+    color: #FFF;
+    background: #6eb7ff;
+    border-bottom: solid 6px #3f87ce;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+    border-radius: 9px;
+    width: 800px;
+}
+.box13 p {
+    margin: 0; 
+    padding: 0;
+}

@@ -68,7 +68,7 @@ public class PassphraseController {
 	@GetMapping(path = "/logout")
 	public String logout(HttpServletRequest request) throws ServletException {
 		request.logout();
-		return "index";
+		return "redirect:menu";
 	}
 	
 	@GetMapping(path = "/error")
