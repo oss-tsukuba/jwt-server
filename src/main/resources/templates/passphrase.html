@@ -17,17 +17,20 @@
         <h1 class="cover-heading">Passphrase</h1>
 
  		<br>
- 		<br>
- 		
- 		<span class="h2">user : </span> <span class="h2" th:text="${user}"></span>
- 		
- 		<br>
+ 		<br>		
  		<br>
  		
  		<div class="box13">
         <p class="h1 passphrase" th:text="${passphrase}"></p>
         </div>
         
+        <br>
+        
+        <div class="attention">
+        This passphrase is only available on this page.  When you leave
+        this page, you will not be able to see it again and will need to
+        regenerate a refresh token.
+        </div>
 		<br>
 		
         <a href="menu">back</a>

@@ -122,15 +122,18 @@ summary {
 	font-size: xx-large;
 }
 
+div.attention {
+	margin: 0 auto;
+	width: 500px;
+	text-align: left;
+}
+
 .box13 {
     padding: 0.5em 1em;
     margin:  0 auto;
-    color: #FFF;
-    background: #6eb7ff;
-    border-bottom: solid 6px #3f87ce;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
     border-radius: 9px;
-    width: 800px;
+    width: 900px;
 }
 .box13 p {
     margin: 0; 
