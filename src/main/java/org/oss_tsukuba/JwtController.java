@@ -328,7 +328,10 @@ public class JwtController {
 
 				try {
 					byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
+					byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
+
 					passphrase.setAccessToken(Base64.getEncoder().encodeToString(enc1));
+					passphrase.setRefreshToken(Base64.getEncoder().encodeToString(enc2));
 
 					tokenRepository.save(passphrase);
 				} catch (Exception e) {
