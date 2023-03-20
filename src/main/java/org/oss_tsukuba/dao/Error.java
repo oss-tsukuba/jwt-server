@@ -71,7 +71,7 @@ public class Error {
 		case CHECK_DIGIT_ERROR:
 			return "check digit";
 		case DECRYPT_ERROR:
-			return "decrypt";
+			return "invalid passphrase";
 		case LENGTH_ERROR:
 			return "character count";
 		case CHARACTER_ERROR:
