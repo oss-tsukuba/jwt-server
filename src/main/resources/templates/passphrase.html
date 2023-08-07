@@ -16,14 +16,20 @@
     <main role="main" class="inner cover">
         <h1 class="cover-heading">Passphrase</h1>
 
+        <br>
  		<br>
- 		<br>		
+ 		<span class="h3">HPCI-ID : </span> <span class="h2" th:text="${user}"></span>
+ 		<br>
  		<br>
  		
  		<div class="box13">
         <p class="h1 passphrase" th:text="${passphrase}"></p>
         </div>
         
+        <br>
+        
+        <span class="h3">Usage: jwt-agent -s </span><span class="h3" th:text="${uri}"> </span><span class="h3"> -l </span><span class="h2" th:text="${user}"></span>
+        <br>
         <br>
         
         <div class="attention">

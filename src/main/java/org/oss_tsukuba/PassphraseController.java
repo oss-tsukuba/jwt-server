@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.security.Principal;
 
@@ -48,8 +49,12 @@ public class PassphraseController {
 	}
 	
 	@GetMapping(path = "/passphrase")
-	public String getPassphrase(Principal principal, Model model) {
+	public String getPassphrase(Principal principal, Model model, HttpServletRequest request) {
 		tokenService.getToken(principal, model);
+		
+		String uri = ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString();
+		uri = uri.replace("passphrase", "");
+		model.addAttribute("uri", uri);
 		
 		return "passphrase";
 	}
