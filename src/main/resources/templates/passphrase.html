@@ -21,16 +21,17 @@
  		<span class="h3">USER : </span> <span class="h2" th:text="${user}"></span>
  		<br>
  		<br>
- 		
+
+		<span class="h3">Passphrase: </span> <button onclick="copyToClipboard('passphrase')">copy</button>
  		<div class="box13">
-        <p class="h1 passphrase" th:text="${passphrase}"></p>
+        <p class="h1 passphrase" th:text="${passphrase}" id="passphrase"></p>
         </div>
         
         <br>
         
-        <span class="h3">You can execute jwt-agent as follows:</span>
+        <span class="h3">You can execute jwt-agent as follows: </span> <button onclick="copyToClipboard('usage')">copy</button>
         <br>
-        <span class="h3"> jwt-agent -s </span><span class="h3" th:text="${uri}"> </span><span class="h3"> -l </span><span class="h2" th:text="${user}"></span>
+        <span class="h3" th:text="'jwt-agent -s ' + ${uri} + ' -l ' + ${user}" id="usage"></span>
         <br>
         <br>
         
@@ -45,4 +46,11 @@
     </main>
 </div>
 
+    <script>
+        function copyToClipboard(id) {
+            var copyTarget = document.getElementById(id);
+            var text = copyTarget.textContent;
+            navigator.clipboard.writeText(text);
+        }
+    </script>
 </body>
