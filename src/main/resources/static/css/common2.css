@@ -140,3 +140,7 @@ div.attention {
     margin: 0; 
     padding: 0;
 }
+
+span.passphrase {
+  background: #f4f4f4;
+}
