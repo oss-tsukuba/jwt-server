@@ -14,7 +14,7 @@
 
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
     <main role="main" class="inner cover">
-        <h1 class="cover-heading">Passphrase</h1>
+        <h1 class="cover-heading">Generate and Store a JSON Web Token</h1>
 
         <br>
  		<br>
@@ -29,6 +29,13 @@
         
         <br>
         <br>
+        <div class="attention">
+        This passphrase is only available on this page.  When you leave
+        this page, you will not be able to see it again and will need to
+        regenerate a refresh token.
+        </div>
+        <br>
+        <br>
         
         <span class="h3">You can execute jwt-agent as follows: </span>
         <br>
@@ -36,13 +43,6 @@
         <button onclick="copyToClipboard('usage')">copy</button>
         <br>
         <br>
-        
-        <div class="attention">
-        This passphrase is only available on this page.  When you leave
-        this page, you will not be able to see it again and will need to
-        regenerate a refresh token.
-        </div>
-		<br>
 		
         <a href="menu">back</a>
     </main>
