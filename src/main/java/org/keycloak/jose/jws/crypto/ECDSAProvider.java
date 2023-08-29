@@ -18,11 +18,6 @@
 package org.keycloak.jose.jws.crypto;
 
 
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.keycloak.common.util.PemUtils;
-import org.keycloak.jose.jws.Algorithm;
-import org.keycloak.jose.jws.JWSInput;
-
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -30,6 +25,11 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECPublicKeySpec;
+
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.keycloak.common.util.PemUtils;
+import org.keycloak.jose.jws.Algorithm;
+import org.keycloak.jose.jws.JWSInput;
 
 /**
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
@@ -80,14 +80,14 @@ public class ECDSAProvider implements SignatureProvider {
 
     public static boolean verify(JWSInput input, PublicKey publicKey) {
         try {
-        	PublicKey pubKey = publicKey;
-        	
-        	if (publicKey instanceof BCECPublicKey) {
-            	ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(((BCECPublicKey)publicKey).getW(), ((BCECPublicKey)publicKey).getParams());
-            	KeyFactory kf = KeyFactory.getInstance("EC");
-            	pubKey = kf.generatePublic(publicKeySpec);
-        	}
-        	
+            PublicKey pubKey = publicKey;
+
+            if (publicKey instanceof BCECPublicKey) {
+                ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(((BCECPublicKey)publicKey).getW(), ((BCECPublicKey)publicKey).getParams());
+                KeyFactory kf = KeyFactory.getInstance("EC");
+                pubKey = kf.generatePublic(publicKeySpec);
+            }
+
             Signature verifier = getSignature(input.getHeader().getAlgorithm());
             verifier.initVerify(pubKey);
             verifier.update(input.getEncodedSignatureInput().getBytes(StandardCharsets.UTF_8));

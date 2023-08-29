@@ -17,26 +17,28 @@
 
 package org.keycloak;
 
+import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.crypto.SecretKey;
+
 import org.keycloak.common.VerificationException;
+import org.keycloak.crypto.SignatureVerifierContext;
 import org.keycloak.exceptions.TokenNotActiveException;
 import org.keycloak.exceptions.TokenSignatureInvalidException;
 import org.keycloak.jose.jws.AlgorithmType;
 import org.keycloak.jose.jws.JWSHeader;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
-import org.keycloak.crypto.SignatureVerifierContext;
 import org.keycloak.jose.jws.crypto.ECDSAProvider;
 import org.keycloak.jose.jws.crypto.HMACProvider;
 import org.keycloak.jose.jws.crypto.RSAProvider;
 import org.keycloak.representations.JsonWebToken;
 import org.keycloak.util.TokenUtil;
-
-import javax.crypto.SecretKey;
-
-import java.security.PublicKey;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
@@ -316,7 +318,7 @@ public class TokenVerifier<T extends JsonWebToken> {
     /**
      * Sets the key for verification of HMAC-based signature.
      * @param secretKey
-     * @return 
+     * @return
      */
     public TokenVerifier<T> secretKey(SecretKey secretKey) {
         this.secretKey = secretKey;
@@ -466,7 +468,7 @@ public class TokenVerifier<T extends JsonWebToken> {
                     if (!ECDSAProvider.verify(jws, publicKey)) {
                         throw new TokenSignatureInvalidException(token, "Invalid token signature");
                     }
-                    break;                    
+                    break;
                 default:
                     throw new VerificationException("Unknown or unsupported token algorithm");
             }
