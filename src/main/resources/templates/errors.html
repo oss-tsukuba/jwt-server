@@ -3,62 +3,64 @@
 <head>
 <meta charset="utf-8">
 <title>Errors</title>
+<link th:href="@{css/common2.css}" rel="stylesheet" />
+<link th:href="@{css/index.css}" rel="stylesheet" />
 <link th:href="@{webjars/bootstrap/5.1.2/css/bootstrap.min.css}"
-	rel="stylesheet" />
+  rel="stylesheet" />
 <script th:href="@{webjars/jquery/3.6.0/js/jquery.min.js}"></script>
 <script th:href="@{webjars/bootstrap/5.1.2/js/bootstrap.min.js}"></script>
 </head>
 
 <body class="text-center">
 
-	<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-		<main role="main" class="inner cover">
-			<h1 class="cover-heading">Authentication Errors</h1>
+  <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <main role="main" class="inner cover">
+      <h1 class="cover-heading">Authentication Errors</h1>
 
-			<br>
+      <br>
 
-			<table class="table table-striped condensed">
-				<thead>
-					<tr>
-						<th class="item1">Time</th>
-						<th class="item2">User</th>
-						<th class="item3">IP Address</th>
-						<th class="item4">Host Name</th>
-						<th class="item5">Kind</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr th:each="error, iterStat : ${errors}">
-						<td th:text="${error.dispDate}"></td>
-						<td th:text="${error.user}"></td>
-						<td th:text="${error.ipAddr}"></td>
-						<td th:text="${error.hostname}"></td>
-						<td th:text="${error.error}"></td>
-					</tr>
-				</tbody>
-			</table>
+      <table class="table table-striped condensed">
+        <thead>
+          <tr>
+            <th class="item1">Time</th>
+            <th class="item2">User</th>
+            <th class="item3">IP Address</th>
+            <th class="item4">Host Name</th>
+            <th class="item5">Kind</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="error, iterStat : ${errors}">
+            <td th:text="${error.dispDate}"></td>
+            <td th:text="${error.user}"></td>
+            <td th:text="${error.ipAddr}"></td>
+            <td th:text="${error.hostname}"></td>
+            <td th:text="${error.error}"></td>
+          </tr>
+        </tbody>
+      </table>
 
-			<div th:fragment='paginationbar'>
-				<ul>
-					<li th:class="${page.first} ? 'disabled':''"
-						style="display: inline"><span th:if="${page.first}">←First</span>
-						<a th:if="${not page.first}" th:href="@{${url}(page=0)}">←First</a></li>
-					<li th:each='i : ${#numbers.sequence(0, page.totalPages-1)}'
-						th:class="(${i}==${page.number})? 'active' : ''"
-						style="display: inline"><span th:if='${i}==${page.number}'
-						th:text='${i+1}'>1</span> <a th:if='${i}!=${page.number}'
-						th:href="@{${url}(page=${i})}"> <span th:text='${i+1}'>1</span>
-					</a></li>
-					<li th:class="${page.last} ? 'disabled':''" style="display: inline">
-						<span th:if="${page.last}">Last➝</span> <a th:if="${not page.last}"
-						th:href="@{${url}(page=(${page.totalPages}-1))}">Last➝</a>
-					</li>
-				</ul>
-			</div>
+      <div th:fragment='paginationbar'>
+        <ul>
+          <li th:class="${page.first} ? 'disabled':''"
+            style="display: inline"><span th:if="${page.first}">←First</span>
+            <a th:if="${not page.first}" th:href="@{${url}(page=0)}">←First</a></li>
+          <li th:each='i : ${#numbers.sequence(0, page.totalPages-1)}'
+            th:class="(${i}==${page.number})? 'active' : ''"
+            style="display: inline"><span th:if='${i}==${page.number}'
+            th:text='${i+1}'>1</span> <a th:if='${i}!=${page.number}'
+            th:href="@{${url}(page=${i})}"> <span th:text='${i+1}'>1</span>
+          </a></li>
+          <li th:class="${page.last} ? 'disabled':''" style="display: inline">
+            <span th:if="${page.last}">Last➝</span> <a th:if="${not page.last}"
+            th:href="@{${url}(page=(${page.totalPages}-1))}">Last➝</a>
+          </li>
+        </ul>
+      </div>
 
-			<a href="menu">back</a>
+      <a href="menu">back</a>
 
-		</main>
-	</div>
+    </main>
+  </div>
 
 </body>

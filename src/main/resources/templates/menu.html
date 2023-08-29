@@ -1,39 +1,49 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Menu</title>
-    <link th:href="@{webjars/bootstrap/5.1.2/css/bootstrap.min.css}" rel="stylesheet"/>
-    <script th:href="@{webjars/jquery/3.6.0/js/jquery.min.js}"></script>
-    <script th:href="@{webjars/bootstrap/5.1.2/js/bootstrap.min.js}"></script>
+<meta charset="utf-8">
+<title>Menu</title>
+<link th:href="@{css/common2.css}" rel="stylesheet" />
+<link th:href="@{css/index.css}" rel="stylesheet" />
+<script th:href="@{webjars/jquery/3.6.0/js/jquery.min.js}"></script>
+<script th:href="@{webjars/bootstrap/5.1.2/js/bootstrap.min.js}"></script>
 </head>
 
 <body class="text-center">
 
-<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-    <main role="main" class="inner cover">
-        <h1 class="cover-heading">Menu</h1>
 
-        <br>
+  <div id="index" class="content">
 
-		<div>
-			<a href="passphrase" role="button">Passphrase</a>
-		</div>	
-		
-		<br>
-		
-		<div>
-			<a href="errors" role="button">Authentication Errors</a>
-		</div>
-		
-		<br>
-		<br>
-		
-		<div>
-			<a class="btn btn-secondary" href="logout" role="button">Logout</a>
-        </div>
-        
-    </main>
-</div>
+    <h1>JWT-SERVER</h1>
+
+    <div class="block">
+      <div class="menu">
+        <ul>
+          <li class="btn triple">
+            <a href="passphrase" role="button">Generate and Store a JSON Web Token</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <br>
+    <br>
+
+    <details>
+    <summary>Advanced Menu</summary>
+    <div class="block">
+      <div class="menu">
+        <ul>
+          <li class="btn triple">
+            <a href="errors" role="button">Authentication Errors</a>
+          </li>
+          <li class="btn triple">
+            <a href="logout" role="button" onclick="return confirm('Invalidate your all tokens?');">Invalidate All Tokens</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    </details>
+  </div>
 
 </body>
