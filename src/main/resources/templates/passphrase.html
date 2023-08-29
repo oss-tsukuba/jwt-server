@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Passphrase</title>
     <link th:href="@{css/common2.css}" rel="stylesheet" />
-    <link th:href="@{css/index.css}" rel="stylesheet" />    
+    <link th:href="@{css/index.css}" rel="stylesheet" />
     <link th:href="@{webjars/bootstrap/5.1.2/css/bootstrap.min.css}" rel="stylesheet"/>
     <script th:href="@{webjars/jquery/3.6.0/js/jquery.min.js}"></script>
     <script th:href="@{webjars/bootstrap/5.1.2/js/bootstrap.min.js}"></script>
@@ -17,51 +17,51 @@
         <h1 class="cover-heading">Access Informaton</h1>
 
         <br>
- 		<br>
- 		<span th:if="${error == 0}">
-	 		<span class="h3">A JSON Web Token is succesfully obtained</span>
-	 		<br>
-	 		<br>
-	 		<div class="box">	 
-		 		<span class="h3">USER : </span> <span class="h2" th:text="${user}"></span>
-		 		<br>
-		 		<br>
-		
-				<span class="h3">Passphrase: </span>
-				<br>
-		        <span class="h2 passphrase" th:text="${passphrase}" id="passphrase"></span>
-		        <button onclick="copyToClipboard('passphrase')">copy</button>
-		        
-		        <br>
-		        <br>
-		        <div class="attention">
-		        This passphrase is only available on this page.  When you leave
-		        this page, you will not be able to see it again and will need to
-		        regenerate a refresh token.
-		        </div>
-	 		</div>
-	        <br>
-	        <br>
-	        
-	        <span class="h3">You can execute jwt-agent as follows: </span>
-	        <br>
-	        <span class="h2 passphrase" th:text="'jwt-agent -s ' + ${uri} + ' -l ' + ${user}" id="usage"></span>
-	        <button onclick="copyToClipboard('usage')">copy</button>
-	    </span>
-   		<div th:if="${error == 1}" class="h3">
-			Possibly Keycloak is down
-   		</div>
-   		<div th:if="${error == 2}", class="h3">
-			Unexpected Error Occurred
-			<br>
-			Possibly Keycloak setup problem
-   		</div>
-   		<div th:if="${error == 1 || error == 2}", class="h3">
-			Please contact your administrator
-   		</div>   		   		
+     <br>
+     <span th:if="${error == 0}">
+       <span class="h3">A JSON Web Token is succesfully obtained</span>
+       <br>
+       <br>
+       <div class="box">
+         <span class="h3">USER : </span> <span class="h2" th:text="${user}"></span>
+         <br>
+         <br>
+
+        <span class="h3">Passphrase: </span>
+        <br>
+            <span class="h2 passphrase" th:text="${passphrase}" id="passphrase"></span>
+            <button onclick="copyToClipboard('passphrase')">copy</button>
+
+            <br>
+            <br>
+            <div class="attention">
+            This passphrase is only available on this page.  When you leave
+            this page, you will not be able to see it again and will need to
+            regenerate a refresh token.
+            </div>
+       </div>
+          <br>
+          <br>
+
+          <span class="h3">You can execute jwt-agent as follows: </span>
+          <br>
+          <span class="h2 passphrase" th:text="'jwt-agent -s ' + ${uri} + ' -l ' + ${user}" id="usage"></span>
+          <button onclick="copyToClipboard('usage')">copy</button>
+      </span>
+       <div th:if="${error == 1}" class="h3">
+      Possibly Keycloak is down
+       </div>
+       <div th:if="${error == 2}", class="h3">
+      Unexpected Error Occurred
+      <br>
+      Possibly Keycloak setup problem
+       </div>
+       <div th:if="${error == 1 || error == 2}", class="h3">
+      Please contact your administrator
+       </div>
         <br>
         <br>
-		
+
         <a href="menu">back</a>
     </main>
 </div>

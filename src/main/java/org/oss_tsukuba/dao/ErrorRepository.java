@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ErrorRepository extends JpaRepository<Error, Integer>, JpaSpecificationExecutor<Error> {
 
-	public Page<Error> findByUserOrderByIdDesc(Pageable pageable, String user);
+    public Page<Error> findByUserOrderByIdDesc(Pageable pageable, String user);
 
 }

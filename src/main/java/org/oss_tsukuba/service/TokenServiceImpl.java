@@ -36,172 +36,172 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class TokenServiceImpl implements TokenService {
 
-	private RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
-	@Autowired
-	private TokenRepository tokenRepository;
+    @Autowired
+    private TokenRepository tokenRepository;
 
-	@Autowired
-	ErrorRepository errorRepository;
-	
-	@Value("${keycloak.auth-server-url}")
-	private String baseUrl;
+    @Autowired
+    ErrorRepository errorRepository;
 
-	@Value("${keycloak.realm}")
-	private String realm;
+    @Value("${keycloak.auth-server-url}")
+    private String baseUrl;
 
-	@Value("${keycloak.resource}")
-	private String clientId;
+    @Value("${keycloak.realm}")
+    private String realm;
 
-	@Value("${keycloak.credentials.secret}")
-	private String secret;
+    @Value("${keycloak.resource}")
+    private String clientId;
 
-	@Value("${user-claim:}")
-	private String userClaim;
-	
-	public TokenServiceImpl(RestTemplate restTemplate) {
-		super();
-		this.restTemplate = restTemplate;
-	}
+    @Value("${keycloak.credentials.secret}")
+    private String secret;
 
-	@Override
-	public void getToken(Principal principal, Model model) {
-		String jwt = null;
+    @Value("${user-claim:}")
+    private String userClaim;
 
-		if (principal instanceof KeycloakAuthenticationToken) {
-			Object obj = ((KeycloakAuthenticationToken) principal).getPrincipal();
+    public TokenServiceImpl(RestTemplate restTemplate) {
+        super();
+        this.restTemplate = restTemplate;
+    }
 
-			if (obj instanceof KeycloakPrincipal<?>) {
-				KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
-				String user = KeycloakUtil.getUserName(principal, userClaim);
-				String rToken = ((RefreshableKeycloakSecurityContext) keycloakPrincipal.getKeycloakSecurityContext())
-						.getRefreshToken();
+    @Override
+    public void getToken(Principal principal, Model model) {
+        String jwt = null;
 
-				String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+        if (principal instanceof KeycloakAuthenticationToken) {
+            Object obj = ((KeycloakAuthenticationToken) principal).getPrincipal();
 
-				HttpHeaders headers = new HttpHeaders();
-				headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-				MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-				params.add("grant_type", "refresh_token");
-				params.add("client_id", clientId);
-				params.add("refresh_token", rToken);
-				params.add("client_secret", secret);
-				HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
-						params, headers);
+            if (obj instanceof KeycloakPrincipal<?>) {
+                KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
+                String user = KeycloakUtil.getUserName(principal, userClaim);
+                String rToken = ((RefreshableKeycloakSecurityContext) keycloakPrincipal.getKeycloakSecurityContext())
+                        .getRefreshToken();
 
-				try {
-					ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
-	
-					HttpStatus responseHttpStatus = result.getStatusCode();
-	
-					if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
-						jwt = result.getBody();
-					} else {
-						model.addAttribute("error", 2);
-						Error error = new Error(user, "", "jwt-server", UNEXPECTED_ERROR);
-						errorRepository.save(error);
-					}
-	
-					if (jwt != null) {
-						LogUtils.trace(jwt);
-	
-						String accessToken = null;
-						String refreshToken = null;
-	
-						try {
-							JSONObject js = (JSONObject) new JSONParser().parse(jwt);
-							accessToken = (String) js.get("access_token");
-							refreshToken = (String) js.get("refresh_token");
-						} catch (ParseException e) {
-							LogUtils.error(e.toString(), e);
-						}
-	
-						Damm dmm = new Damm();
-	
-						String key = dmm.getPassphrase();
-						String passphrase = key + dmm.damm32Encode(key.toCharArray());
-	
-						model.addAttribute("passphrase", passphrase);
-						model.addAttribute("user", user);
-	
-						try {
-							byte[] iv = CryptUtil.generateIV();
-							byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
-							byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
-	
-							tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
-									Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
-						} catch (Exception e) {
-							LogUtils.error(e.toString(), e);
-						}
-					}
-				}catch (RestClientException e) {
-					model.addAttribute("error", 1);
-					Error error = new Error(user, "", "jwt-server", SERVER_DOWN);
-					errorRepository.save(error);
-				}
-			}
-		}
-	}
+                String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 
-	@Override
-	public String getToken(String user, String pass) {
-		String jwt = null;
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+                params.add("grant_type", "refresh_token");
+                params.add("client_id", clientId);
+                params.add("refresh_token", rToken);
+                params.add("client_secret", secret);
+                HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
+                        params, headers);
 
-		String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+                try {
+                    ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-		params.add("grant_type", "password");
-		params.add("client_id", clientId);
-		params.add("username", user);
-		params.add("password", pass);
-		params.add("client_secret", secret);
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
-				headers);
+                    HttpStatus responseHttpStatus = result.getStatusCode();
 
-		ResponseEntity<String> result = new RestTemplate().postForEntity(url, request, String.class);
+                    if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
+                        jwt = result.getBody();
+                    } else {
+                        model.addAttribute("error", 2);
+                        Error error = new Error(user, "", "jwt-server", UNEXPECTED_ERROR);
+                        errorRepository.save(error);
+                    }
 
-		HttpStatus responseHttpStatus = result.getStatusCode();
+                    if (jwt != null) {
+                        LogUtils.trace(jwt);
 
-		if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
-			jwt = result.getBody();
-		}
+                        String accessToken = null;
+                        String refreshToken = null;
 
-		if (jwt != null) {
-			LogUtils.trace(jwt);
+                        try {
+                            JSONObject js = (JSONObject) new JSONParser().parse(jwt);
+                            accessToken = (String) js.get("access_token");
+                            refreshToken = (String) js.get("refresh_token");
+                        } catch (ParseException e) {
+                            LogUtils.error(e.toString(), e);
+                        }
 
-			String accessToken = null;
-			String refreshToken = null;
+                        Damm dmm = new Damm();
 
-			try {
-				JSONObject js = (JSONObject) new JSONParser().parse(jwt);
-				accessToken = (String) js.get("access_token");
-				refreshToken = (String) js.get("refresh_token");
-			} catch (ParseException e) {
-				LogUtils.error(e.toString(), e);
-			}
+                        String key = dmm.getPassphrase();
+                        String passphrase = key + dmm.damm32Encode(key.toCharArray());
 
-			Damm dmm = new Damm();
+                        model.addAttribute("passphrase", passphrase);
+                        model.addAttribute("user", user);
 
-			String key = dmm.getPassphrase();
-			String passphrase = key + dmm.damm32Encode(key.toCharArray());
+                        try {
+                            byte[] iv = CryptUtil.generateIV();
+                            byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
+                            byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
 
-			try {
-				byte[] iv = CryptUtil.generateIV();
-				byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
-				byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
+                            tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
+                                    Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
+                        } catch (Exception e) {
+                            LogUtils.error(e.toString(), e);
+                        }
+                    }
+                }catch (RestClientException e) {
+                    model.addAttribute("error", 1);
+                    Error error = new Error(user, "", "jwt-server", SERVER_DOWN);
+                    errorRepository.save(error);
+                }
+            }
+        }
+    }
 
-				tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
-						Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
-			} catch (Exception e) {
-				LogUtils.error(e.toString(), e);
-			}
+    @Override
+    public String getToken(String user, String pass) {
+        String jwt = null;
 
-			return passphrase;
-		}
+        String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 
-		return null;
-	}
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        params.add("grant_type", "password");
+        params.add("client_id", clientId);
+        params.add("username", user);
+        params.add("password", pass);
+        params.add("client_secret", secret);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
+                headers);
+
+        ResponseEntity<String> result = new RestTemplate().postForEntity(url, request, String.class);
+
+        HttpStatus responseHttpStatus = result.getStatusCode();
+
+        if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
+            jwt = result.getBody();
+        }
+
+        if (jwt != null) {
+            LogUtils.trace(jwt);
+
+            String accessToken = null;
+            String refreshToken = null;
+
+            try {
+                JSONObject js = (JSONObject) new JSONParser().parse(jwt);
+                accessToken = (String) js.get("access_token");
+                refreshToken = (String) js.get("refresh_token");
+            } catch (ParseException e) {
+                LogUtils.error(e.toString(), e);
+            }
+
+            Damm dmm = new Damm();
+
+            String key = dmm.getPassphrase();
+            String passphrase = key + dmm.damm32Encode(key.toCharArray());
+
+            try {
+                byte[] iv = CryptUtil.generateIV();
+                byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
+                byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
+
+                tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
+                        Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
+            } catch (Exception e) {
+                LogUtils.error(e.toString(), e);
+            }
+
+            return passphrase;
+        }
+
+        return null;
+    }
 }

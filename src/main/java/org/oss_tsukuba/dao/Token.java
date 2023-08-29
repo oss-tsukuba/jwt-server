@@ -20,20 +20,20 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Token {
 
-	@Id
-	@Column(name = "user")
-	private String user;
+    @Id
+    @Column(name = "user")
+    private String user;
 
-	@Id
-	@Column(name = "audience")
-	private String audience;
-	
-	@Column(name = "access_token")
-	private String accessToken;
+    @Id
+    @Column(name = "audience")
+    private String audience;
 
-	@Column(name = "refresh_token")
-	private String refreshToken;
-	
-	@Column(name = "iv")
-	private String iv;
+    @Column(name = "access_token")
+    private String accessToken;
+
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
+    @Column(name = "iv")
+    private String iv;
 }

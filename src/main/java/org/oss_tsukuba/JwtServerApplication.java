@@ -12,20 +12,20 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 @SpringBootApplication
 public class JwtServerApplication extends SpringBootServletInitializer {
 
-	public static void main(String[] args) {
-		
-		Security.addProvider(new BouncyCastleProvider());
+    public static void main(String[] args) {
+
+        Security.addProvider(new BouncyCastleProvider());
         CryptoIntegration.init(JwtServerApplication.class.getClassLoader());
 
-		SpringApplication.run(JwtServerApplication.class, args);
-	}
+        SpringApplication.run(JwtServerApplication.class, args);
+    }
 
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-		
-		Security.addProvider(new BouncyCastleProvider());
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+
+        Security.addProvider(new BouncyCastleProvider());
         CryptoIntegration.init(getClass().getClassLoader());
 
-		return builder.sources(JwtServerApplication.class);
-	}
+        return builder.sources(JwtServerApplication.class);
+    }
 }
