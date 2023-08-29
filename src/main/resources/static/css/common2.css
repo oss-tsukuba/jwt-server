@@ -144,3 +144,12 @@ div.attention {
 span.passphrase {
   background: #f4f4f4;
 }
+
+.box {
+    padding: 0.5em 1em;
+    margin: 0 auto;
+    background: #FFF;
+    border: solid 3px #6091d3;/*線*/
+    border-radius: 10px;/*角の丸み*/
+    width:800px;
+}

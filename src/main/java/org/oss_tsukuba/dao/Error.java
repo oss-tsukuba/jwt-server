@@ -30,6 +30,10 @@ public class Error {
 	public static final int CHARACTER_ERROR = 3;
 	
 	public static final int EXPIRED_ERROR = 4;
+	
+	public static final int SERVER_DOWN = 5;
+	
+	public static final int UNEXPECTED_ERROR = 6;
 
 	@Id
 	@Column(name = "id")
@@ -78,6 +82,10 @@ public class Error {
 			return "character";
 		case EXPIRED_ERROR:
 			return "expired";
+		case SERVER_DOWN:
+			return "server down";
+		case UNEXPECTED_ERROR:
+			return "unexpected error";
 		}
 
 		return "others";

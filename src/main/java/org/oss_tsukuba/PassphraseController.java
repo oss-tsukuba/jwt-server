@@ -1,5 +1,10 @@
 package org.oss_tsukuba;
 
+import java.security.Principal;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
 import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
 import org.oss_tsukuba.service.TokenService;
@@ -12,11 +17,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.security.Principal;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class PassphraseController {
@@ -50,6 +50,7 @@ public class PassphraseController {
 	
 	@GetMapping(path = "/passphrase")
 	public String getPassphrase(Principal principal, Model model, HttpServletRequest request) {
+		model.addAttribute("error", 0);
 		tokenService.getToken(principal, model);
 		
 		String uri = ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString();

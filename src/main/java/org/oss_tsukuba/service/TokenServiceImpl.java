@@ -1,5 +1,7 @@
 package org.oss_tsukuba.service;
 
+import static org.oss_tsukuba.dao.Error.*;
+
 import java.security.Principal;
 import java.util.Base64;
 
@@ -9,6 +11,8 @@ import org.json.simple.parser.ParseException;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.oss_tsukuba.dao.Error;
+import org.oss_tsukuba.dao.ErrorRepository;
 import org.oss_tsukuba.dao.Token;
 import org.oss_tsukuba.dao.TokenRepository;
 import org.oss_tsukuba.utils.CryptUtil;
@@ -26,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -36,6 +41,9 @@ public class TokenServiceImpl implements TokenService {
 	@Autowired
 	private TokenRepository tokenRepository;
 
+	@Autowired
+	ErrorRepository errorRepository;
+	
 	@Value("${keycloak.auth-server-url}")
 	private String baseUrl;
 
@@ -50,7 +58,7 @@ public class TokenServiceImpl implements TokenService {
 
 	@Value("${user-claim:}")
 	private String userClaim;
-
+	
 	public TokenServiceImpl(RestTemplate restTemplate) {
 		super();
 		this.restTemplate = restTemplate;
@@ -81,46 +89,56 @@ public class TokenServiceImpl implements TokenService {
 				HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
 						params, headers);
 
-				ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
-
-				HttpStatus responseHttpStatus = result.getStatusCode();
-
-				if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
-					jwt = result.getBody();
-				}
-
-				if (jwt != null) {
-					LogUtils.trace(jwt);
-
-					String accessToken = null;
-					String refreshToken = null;
-
-					try {
-						JSONObject js = (JSONObject) new JSONParser().parse(jwt);
-						accessToken = (String) js.get("access_token");
-						refreshToken = (String) js.get("refresh_token");
-					} catch (ParseException e) {
-						LogUtils.error(e.toString(), e);
+				try {
+					ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
+	
+					HttpStatus responseHttpStatus = result.getStatusCode();
+	
+					if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
+						jwt = result.getBody();
+					} else {
+						model.addAttribute("error", 2);
+						Error error = new Error(user, "", "jwt-server", UNEXPECTED_ERROR);
+						errorRepository.save(error);
 					}
-
-					Damm dmm = new Damm();
-
-					String key = dmm.getPassphrase();
-					String passphrase = key + dmm.damm32Encode(key.toCharArray());
-
-					model.addAttribute("passphrase", passphrase);
-					model.addAttribute("user", user);
-
-					try {
-						byte[] iv = CryptUtil.generateIV();
-						byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
-						byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
-
-						tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
-								Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
-					} catch (Exception e) {
-						LogUtils.error(e.toString(), e);
+	
+					if (jwt != null) {
+						LogUtils.trace(jwt);
+	
+						String accessToken = null;
+						String refreshToken = null;
+	
+						try {
+							JSONObject js = (JSONObject) new JSONParser().parse(jwt);
+							accessToken = (String) js.get("access_token");
+							refreshToken = (String) js.get("refresh_token");
+						} catch (ParseException e) {
+							LogUtils.error(e.toString(), e);
+						}
+	
+						Damm dmm = new Damm();
+	
+						String key = dmm.getPassphrase();
+						String passphrase = key + dmm.damm32Encode(key.toCharArray());
+	
+						model.addAttribute("passphrase", passphrase);
+						model.addAttribute("user", user);
+	
+						try {
+							byte[] iv = CryptUtil.generateIV();
+							byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
+							byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
+	
+							tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
+									Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
+						} catch (Exception e) {
+							LogUtils.error(e.toString(), e);
+						}
 					}
+				}catch (RestClientException e) {
+					model.addAttribute("error", 1);
+					Error error = new Error(user, "", "jwt-server", SERVER_DOWN);
+					errorRepository.save(error);
 				}
 			}
 		}
