@@ -29,6 +29,7 @@
 
         <span class="h3">Passphrase: </span>
         <br>
+        <br>
             <span class="h2 passphrase" th:text="${passphrase}" id="passphrase"></span>
             <button onclick="copyToClipboard('passphrase')">copy</button>
 
@@ -44,6 +45,7 @@
           <br>
 
           <span class="h3">You can execute jwt-agent as follows: </span>
+          <br>
           <br>
           <span class="h2 passphrase" th:text="'jwt-agent -s ' + ${uri} + ' -l ' + ${user}" id="usage"></span>
           <button onclick="copyToClipboard('usage')">copy</button>
