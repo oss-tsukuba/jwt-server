@@ -261,6 +261,7 @@ public class JwtController {
                     Base64.getEncoder().encodeToString(enc2),
                     Base64.getEncoder().encodeToString(iv)));
 
+            LogUtils.info(String.format("User:%s changed passphrase from %s", user, ipAddr));
         } catch (Exception e) {
             LogUtils.error(e.toString(), e);
             Error error = new Error(user, ipAddr, hostname, DECRYPT_ERROR);

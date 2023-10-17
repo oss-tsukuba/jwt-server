@@ -131,6 +131,8 @@ public class TokenServiceImpl implements TokenService {
 
                             tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
                                     Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
+
+                            LogUtils.info(String.format("User:%s changed passphrase from Web Browser", user));
                         } catch (Exception e) {
                             LogUtils.error(e.toString(), e);
                         }
