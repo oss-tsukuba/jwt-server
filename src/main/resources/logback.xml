@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<include
-		resource="org/springframework/boot/logging/logback/defaults.xml" />
-	<include
-		resource="org/springframework/boot/logging/logback/console-appender.xml" />
-	<appender name="SYSLOG"
-		class="ch.qos.logback.classic.net.SyslogAppender">
-		<facility>LOCAL1</facility>
-		<suffixPattern>[%thread] %logger %msg</suffixPattern>
-	</appender>
+  <include
+    resource="org/springframework/boot/logging/logback/defaults.xml" />
+  <include
+    resource="org/springframework/boot/logging/logback/console-appender.xml" />
+  <appender name="SYSLOG"
+    class="ch.qos.logback.classic.net.SyslogAppender">
+    <facility>LOCAL1</facility>
+    <suffixPattern>[%thread] %logger %msg</suffixPattern>
+  </appender>
 
-	<root level="DEBUG">
-		<appender-ref ref="SYSLOG" />
-		<appender-ref ref="CONSOLE" />
-	</root>
+  <root level="INFO">
+    <appender-ref ref="SYSLOG" />
+    <appender-ref ref="CONSOLE" />
+  </root>
 </configuration>
