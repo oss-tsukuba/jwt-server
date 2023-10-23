@@ -150,9 +150,11 @@ public class JwtController {
         // 文字数の検査
         if (!damm.isValidLength(code)) {
             // error
-            LogUtils.error("length error");
+            LogUtils.debug("length error");
             Error error = new Error(user, ipAddr, hostname, LENGTH_ERROR);
             errorRepository.save(error);
+
+            LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(), error.getIpAddr()));
 
             return error(user);
         }
@@ -160,9 +162,11 @@ public class JwtController {
         // 文字の検査
         if (!damm.isValidChar(code)) {
             // error
-            LogUtils.error("character error");
+            LogUtils.debug("character error");
             Error error = new Error(user, ipAddr, hostname, CHARACTER_ERROR);
             errorRepository.save(error);
+
+            LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(), error.getIpAddr()));
 
             return error(user);
         }
@@ -170,9 +174,11 @@ public class JwtController {
         // check digit の検査
         if (!damm.damm32Check(code)) {
             // error
-            LogUtils.error("check digit error");
+            LogUtils.debug("check digit error");
             Error error = new Error(user, ipAddr, hostname, CHECK_DIGIT_ERROR);
             errorRepository.save(error);
+
+            LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(), error.getIpAddr()));
 
             return error(user);
         }
@@ -267,6 +273,8 @@ public class JwtController {
             Error error = new Error(user, ipAddr, hostname, DECRYPT_ERROR);
             errorRepository.save(error);
 
+            LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(), error.getIpAddr()));
+
             return error(user);
         }
 
@@ -338,12 +346,16 @@ public class JwtController {
                 Error error = new Error(user, ipAddr, hostname, EXPIRED_ERROR);
                 errorRepository.save(error);
 
+                LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(), error.getIpAddr()));
+
                 return error(user);
             }
         } catch (Exception e) {
             LogUtils.error(e.toString(), e);
             Error error = new Error(user, ipAddr, hostname, DECRYPT_ERROR);
             errorRepository.save(error);
+
+            LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(), error.getIpAddr()));
 
             return error(user);
         }

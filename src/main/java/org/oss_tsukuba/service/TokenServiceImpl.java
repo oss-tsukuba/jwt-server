@@ -100,6 +100,8 @@ public class TokenServiceImpl implements TokenService {
                         model.addAttribute("error", 2);
                         Error error = new Error(user, "", "jwt-server", UNEXPECTED_ERROR);
                         errorRepository.save(error);
+
+                        LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(), error.getIpAddr()));
                     }
 
                     if (jwt != null) {
@@ -141,6 +143,8 @@ public class TokenServiceImpl implements TokenService {
                     model.addAttribute("error", 1);
                     Error error = new Error(user, "", "jwt-server", SERVER_DOWN);
                     errorRepository.save(error);
+
+                    LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(), error.getIpAddr()));
                 }
             }
         }
