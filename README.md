@@ -4,6 +4,10 @@ JWT server is a web application that stores refresh tokens of OAuth2 securely, a
 
 When you log in the JWT server, access information will be provided, which includes a user name and passphrase to retrieve an access token by `jwt-agent` or `jwt-logon`.
 
+JWT servers can be redundant using DBMS multi-source replication(see ).
+Also, `jwt-agent` and `jwt-logon` can specify multiple redundant JWT servers.
+If a server is down, they cloud retriave an access token from other working servers.
+
 # System Requirements
 
  - [Keycloak](https://www.keycloak.org/)
@@ -74,7 +78,7 @@ jwt-server.passphrase=${PASSPHRASE}
 
 If you specify this, you can get a passphrase for `${USER}` to retrieve an access token by the following command line using a secret API when the JWT server's URL is `https://${HOST}/jwt-server/`.  This is useful for automatic testing purpose to obtain the passphrase by the command line without a web browser.  This API can be used only once.
 ```
-curl -X POST -d "user=${USER}" -d "password=${PASSWORD}" -d ${PASSPHRAE} https://${HOST}/jwt-server/init_jwt
+curl -X POST -d "user=${USER}" -d "password=${PASSWORD}" -d "passphrase=${PASSPHRAE}" https://${HOST}/jwt-server/init_jwt
 ```
 ## Build
 
@@ -87,3 +91,4 @@ mvn package
 # Deploy the JWT server
 
 Deploy `jwt-server.war` on the web application server like tomcat.
+
