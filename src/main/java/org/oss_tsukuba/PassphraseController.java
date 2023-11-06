@@ -77,11 +77,4 @@ public class PassphraseController {
         request.logout();
         return "redirect:menu";
     }
-
-    @GetMapping(path = "/error")
-    public String getError(HttpServletRequest request) throws ServletException {
-        request.logout();
-
-        return "error";
-    }
 }
