@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Controller
@@ -48,7 +49,7 @@ public class PassphraseController {
         return "menu";
     }
 
-    @GetMapping(path = "/passphrase")
+    @PostMapping(path = "/passphrase")
     public String getPassphrase(Principal principal, Model model, HttpServletRequest request) {
         model.addAttribute("error", 0);
         tokenService.getToken(principal, model);

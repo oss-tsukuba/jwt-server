@@ -20,7 +20,10 @@
       <div class="menu">
         <ul>
           <li class="btn triple">
-            <a href="passphrase" role="button">Generate and Store a JSON Web Token</a>
+            <form method="post" name="passform" action="passphrase">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <a href="javascript:passform.submit()" role="button">Generate and Store a JSON Web Token</a>
+            </form>
           </li>
         </ul>
       </div>
