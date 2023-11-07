@@ -91,7 +91,7 @@ auto_increment_increment=5
 auto_increment_offset=2
 
 replicate-do-table=gfarmdb.tokens
-replicate-ignore-table=gfarmdb.errors
+replicate-ignore-table=gfarmdb.errors,gfarmdb.issues
 
 master_retry_count=0
 ```
