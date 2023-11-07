@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Issues</title>
+<link th:href="@{css/common2.css}" rel="stylesheet" />
+<link th:href="@{css/index.css}" rel="stylesheet" />
+<link th:href="@{webjars/bootstrap/5.1.2/css/bootstrap.min.css}"
+  rel="stylesheet" />
+<script th:href="@{webjars/jquery/3.6.0/js/jquery.min.js}"></script>
+<script th:href="@{webjars/bootstrap/5.1.2/js/bootstrap.min.js}"></script>
+</head>
+
+<body class="text-center">
+
+  <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <main role="main" class="inner cover">
+      <h1 class="cover-heading">Date of Issued</h1>
+
+      <br>
+
+      <table class="table table-striped condensed">
+        <thead>
+          <tr>
+            <th class="item1">Time</th>
+            <th class="item3">IP Address</th>
+            <th class="item4">Host Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="issue, iterStat : ${issues}">
+            <td th:text="${issue.dispDate}"></td>
+            <td th:text="${issue.ipAddr}"></td>
+            <td th:text="${issue.hostname}"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div th:fragment='paginationbar'>
+        <ul>
+          <li th:class="${page.first} ? 'disabled':''"
+            style="display: inline"><span th:if="${page.first}">←First</span>
+            <a th:if="${not page.first}" th:href="@{${url}(page=0)}">←First</a></li>
+          <li th:each='i : ${#numbers.sequence(0, page.totalPages-1)}'
+            th:class="(${i}==${page.number})? 'active' : ''"
+            style="display: inline"><span th:if='${i}==${page.number}'
+            th:text='${i+1}'>1</span> <a th:if='${i}!=${page.number}'
+            th:href="@{${url}(page=${i})}"> <span th:text='${i+1}'>1</span>
+          </a></li>
+          <li th:class="${page.last} ? 'disabled':''" style="display: inline">
+            <span th:if="${page.last}">Last➝</span> <a th:if="${not page.last}"
+            th:href="@{${url}(page=(${page.totalPages}-1))}">Last➝</a>
+          </li>
+        </ul>
+      </div>
+
+      <a href="menu">back</a>
+
+    </main>
+  </div>
+
+</body>

@@ -16,6 +16,11 @@
   float:left;
 }
 
+#index .menu2 li{
+  width:280px;
+  float:left;
+}
+
 #index .menu li.btn{
   margin:0 12px 12px 0;
   background-color:#008cc1;
