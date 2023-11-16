@@ -2,7 +2,7 @@
 -- Table structure for table `errors`
 --
 
-CREATE TABLE `errors` (
+CREATE TABLE IF NOT EXISTS `errors` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user` varchar(20) NOT NULL,
   `date` timestamp NULL,
@@ -18,7 +18,7 @@ CREATE TABLE `errors` (
 -- Table structure for table `tokens`
 --
 
-CREATE TABLE `tokens` (
+CREATE TABLE IF NOT EXISTS `tokens` (
   `user` varchar(20) NOT NULL,
   `audience` varchar(20) NOT NULL,
   `access_token` text,
@@ -31,7 +31,7 @@ CREATE TABLE `tokens` (
 -- Table structure for table `errors`
 --
 
-CREATE TABLE `issues` (
+CREATE TABLE IF NOT EXISTS `issues` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user` varchar(20) NOT NULL,
   `date` timestamp NULL,
