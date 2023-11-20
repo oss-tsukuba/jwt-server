@@ -5,6 +5,8 @@ import static org.oss_tsukuba.dao.Error.UNEXPECTED_ERROR;
 import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +42,7 @@ public class PassphraseController {
     @Value("${user-claim:}")
     private String userClaim;
 
-    private DateFormat formatter = new SimpleDateFormat("YYYY MM/dd HH:mm:ss");
+    private DateFormat formatter = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 
     @GetMapping(path = "/")
     public String getRoot(Model model) {
@@ -86,6 +88,7 @@ public class PassphraseController {
         model.addAttribute("page", errors);
         model.addAttribute("errors", errors.getContent());
         model.addAttribute("url", "errors");
+        model.addAttribute("offset", OffsetDateTime.now().getOffset());
 
         return "errors";
     }
@@ -97,6 +100,7 @@ public class PassphraseController {
         model.addAttribute("page", issues);
         model.addAttribute("issues", issues.getContent());
         model.addAttribute("url", "errors");
+        model.addAttribute("offset", OffsetDateTime.now().getOffset());
 
         return "issues";
     }
