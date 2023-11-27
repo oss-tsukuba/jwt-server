@@ -37,7 +37,7 @@ public class Issue {
     @Column(name = "date")
     private Date date;
 
-    static private SimpleDateFormat df = new SimpleDateFormat("yyyy MM/dd HH:mm:ss");
+    static private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public Issue(String user, String ipAddr, String hostname) {
         super();

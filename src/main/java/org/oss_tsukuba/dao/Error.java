@@ -54,7 +54,7 @@ public class Error {
     @Column(name = "type")
     private int type;
 
-    static private SimpleDateFormat df = new SimpleDateFormat("yyyy MM/dd HH:mm:ss");
+    static private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
     public Error(String user, String ipAddr, String hostname, int type) {
