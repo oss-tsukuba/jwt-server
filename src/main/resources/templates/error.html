@@ -17,7 +17,7 @@
         <br>
 
     <div>
-    Unexpected Error Occurred
+    Session Timeout or Unexpected Error Occurred
     </div>
 
     <br>
@@ -25,6 +25,7 @@
     <div>
     Please contact your administrator.
     </div>
+    <div th:if="contactInfo != ''" th:utext="${contactInfo}"></div>
 
     <br>
 
