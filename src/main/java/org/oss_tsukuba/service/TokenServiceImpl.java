@@ -3,7 +3,10 @@ package org.oss_tsukuba.service;
 import static org.oss_tsukuba.dao.Error.*;
 
 import java.security.Principal;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Base64;
+import java.util.Date;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -59,9 +62,36 @@ public class TokenServiceImpl implements TokenService {
     @Value("${user-claim:}")
     private String userClaim;
 
+    private static String EXP_CLAIM = "exp";
+
+    static private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     public TokenServiceImpl(RestTemplate restTemplate) {
         super();
         this.restTemplate = restTemplate;
+    }
+
+    private String getExpDate(String token) {
+        String[] jwts = token.split("\\.");
+        String date = "";
+
+        if (jwts.length == 3) {
+            String json = new String(Base64.getDecoder().decode(jwts[1]));
+
+            try {
+                JSONObject  jsonObj = (JSONObject) new JSONParser().parse(json);
+
+                Long exp = (Long) jsonObj.get(EXP_CLAIM);
+                Instant instant = Instant.ofEpochSecond(exp);
+
+                return df.format(Date.from(instant));
+            } catch (ParseException e) {
+                LogUtils.error(e.toString(), e);
+            }
+
+        }
+
+        return date;
     }
 
     @Override
@@ -125,6 +155,10 @@ public class TokenServiceImpl implements TokenService {
 
                         model.addAttribute("passphrase", passphrase);
                         model.addAttribute("user", user);
+                        model.addAttribute("token", accessToken);
+
+                        String expDate = getExpDate(accessToken);
+                        model.addAttribute("exp", expDate);
 
                         try {
                             byte[] iv = CryptUtil.generateIV();

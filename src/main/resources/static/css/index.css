@@ -63,3 +63,9 @@ p.sample {
 
 }
 
+.box .token {
+  width: 100%;
+    overflow-wrap: break-word;
+    text-align: left;
+}
+

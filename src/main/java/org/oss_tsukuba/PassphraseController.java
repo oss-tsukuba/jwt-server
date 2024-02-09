@@ -77,6 +77,7 @@ public class PassphraseController {
         Issue issue = new Issue(user, ipAddr, hostname);
         issueRepository.save(issue);
         model.addAttribute("date", formatter.format(issue.getDate()));
+        model.addAttribute("offset", OffsetDateTime.now().getOffset());
 
         return "passphrase";
     }
