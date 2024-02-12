@@ -59,7 +59,7 @@
           <br>
           <details>
             <summary class="h3">Access Token</summary>
-            expired (<span th:text="${offset}"></span>) : <span th:text="${exp}"></span> <button onclick="copyToClipboard('token')">copy</button>
+            expired : <span th:text="${exp}"></span> <span th:text="${offset}"></span> <button onclick="copyToClipboard('token')">copy</button>
 
             <div class="box">
               <div class="token" th:text="${token}" id="token"></div>
