@@ -1,12 +1,9 @@
 package org.oss_tsukuba;
 
-import static org.oss_tsukuba.dao.Error.UNEXPECTED_ERROR;
-
 import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +39,9 @@ public class PassphraseController {
     @Value("${user-claim:}")
     private String userClaim;
 
+    @Value("${version:0.0.0}")
+    private String version;
+
     private DateFormat formatter = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 
     @GetMapping(path = "/")
@@ -58,6 +58,8 @@ public class PassphraseController {
 
     @GetMapping(path = "/menu")
     public String getMenu(Model model) {
+
+        model.addAttribute("version", version);
 
         return "menu";
     }

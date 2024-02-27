@@ -69,3 +69,8 @@ p.sample {
     text-align: left;
 }
 
+div.version {
+	text-align: center;
+	font-size: x-large;
+}
+
