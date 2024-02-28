@@ -4,9 +4,7 @@ JWT server is a web application that stores refresh tokens of OAuth2 securely, a
 
 When you log in the JWT server, access information will be provided, which includes a user name and passphrase to retrieve an access token by `jwt-agent` or `jwt-logon`.
 
-JWT servers can be redundant using DBMS multi-source replication(see ).
-Also, `jwt-agent` and `jwt-logon` can specify multiple redundant JWT servers.
-If a server is down, they cloud retriave an access token from other working servers.
+JWT servers can be redundant using DBMS multi-source replication.  When `jwt-agent` or `jwt-logon` specifies multiple redundant JWT servers, an active JWT server is automatically selected.
 
 # System Requirements
 
