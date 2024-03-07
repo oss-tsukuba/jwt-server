@@ -51,7 +51,12 @@
           <span class="h3">You can execute jwt-agent as follows: </span>
           <br>
           <br>
-          <span class="h2 passphrase" th:text="'jwt-agent -s ' + ${uri} + ' -l ' + ${user}" id="usage"></span>
+          <th:block th:if="${redundancy}">
+            <span class="h2 passphrase" th:text="'jwt-agent -s ' + ${uri} + ' -s ' + ${otherUrl} + ' -l ' + ${user}" id="usage"></span>
+          </th:block>
+          <th:block th:unless="${redundancy}">
+            <span class="h2 passphrase" th:text="'jwt-agent -s ' + ${uri} + ' -l ' + ${user}" id="usage"></span>
+          </th:block>
           <button onclick="copyToClipboard('usage')">copy</button>
 
           <br>

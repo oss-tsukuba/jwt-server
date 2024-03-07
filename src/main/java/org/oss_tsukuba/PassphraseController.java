@@ -39,6 +39,9 @@ public class PassphraseController {
     @Value("${user-claim:}")
     private String userClaim;
 
+    @Value("${other-jwt-server:}")
+    private String otherUrl;
+
     @Value("${version:0.0.0}")
     private String version;
 
@@ -80,6 +83,8 @@ public class PassphraseController {
         issueRepository.save(issue);
         model.addAttribute("date", formatter.format(issue.getDate()));
         model.addAttribute("offset", OffsetDateTime.now().getOffset());
+        model.addAttribute("redundancy", !"".equals(otherUrl));
+        model.addAttribute("otherUrl", otherUrl);
 
         return "passphrase";
     }
