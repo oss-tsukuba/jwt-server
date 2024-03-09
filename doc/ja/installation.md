@@ -150,18 +150,18 @@ keycloak.resource=clientId
 keycloak.public-client=false
 keycloak.credentials.secret=KEYCLOAK_SECRET
 user-claim=hoge.id
-```
 
 # MySQL settings
-
-spring.datasource.url=jdbc:mysql://${MYSQL\_HOST:localhost}:3306/jwtserverdb …ホスト部にlocalhost、パス部にデータベース名を記載
-
-```
+spring.datasource.url=jdbc:mysql://${MYSQL_HOST:localhost}:3306/jwtserverdb …ホスト部にlocalhost、パス部にデータベース名を記載
 spring.datasource.username=jwtserver …データベース・ユーザー名を記載
 spring.datasource.password=DBPASSWORD …データベース・ユーザー用パスワードを記載
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.jpa.database=MYSQL
 spring.jpa.hibernate.ddl-auto=update
+
+# others
+contact-info=
+replicated-jwt-servers=
 ```
 
 各設定値の内容は以下の通りである。
@@ -218,6 +218,14 @@ spring.jpa.hibernate.ddl-auto=update
 
     データベースのスキーマの生成方法を設定する。
 
+  - contact-info
+  
+    エラー画面に表示する管理者の連絡先等を設定する。必要ない場合は設定しなくてもよい。
+
+  - replicated-jwt-servers
+
+    JWT Serverを冗長化して場合に複数のJWT ServerのURLを設定すると冗長化したJWT Serverの利用方法が表示される。必要ない場合は設定しなくてもよい。
+    
 ### jwt-serverのビルド
 
 ```
