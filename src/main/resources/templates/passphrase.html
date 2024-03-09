@@ -52,10 +52,10 @@
           <br>
           <br>
           <th:block th:if="${redundancy}">
-            <span class="h2 passphrase" th:text="'jwt-agent -s ' + ${uri} + ' -s ' + ${otherUrl} + ' -l ' + ${user}" id="usage"></span>
+            <span class="h2 passphrase" th:text="'jwt-agent ' + ${otherUrl} + ' -l ' + ${user}" id="usage"></span>
           </th:block>
           <th:block th:unless="${redundancy}">
-            <span class="h2 passphrase" th:text="'jwt-agent -s ' + ${uri} + ' -l ' + ${user}" id="usage"></span>
+            <span class="h2 passphrase" th:text="'jwt-agent ' + ${uri} + ' -l ' + ${user}" id="usage"></span>
           </th:block>
           <button onclick="copyToClipboard('usage')">copy</button>
 
