@@ -12,7 +12,7 @@
 
 ## Server1の設定
 
-### 設定ファイルの変更 
+### 設定ファイルの変更
 
 つぎの内容のファイルを作成し、/etc/my.cnf.d 配下に配置する。仮にmysql.cnfとする。
 
@@ -38,11 +38,11 @@ master_retry_count=0
 - replicate-do-table: レプリケーションを実行するテーブルを指定する。
 - replicate-ignore-table: レプリケーションを実行しないテーブルを指定する。
 - master_retry_count: マスタに接続できない場合に接続を試みる回数を指定する（0:無限）。
-  
+
   サーバを再起動する。
 
 ```
-# systemctl restart mysqld 
+# systemctl restart mysqld
 ```
 
 ### マスタ/スレーブの設定
@@ -58,7 +58,7 @@ GRANT REPLICATION SLAVE ON *.* TO 'replica'@'%';
 
 スレーブの設定を行う。
 ```
-CHANGE MASTER TO 
+CHANGE MASTER TO
  MASTER_HOST = 'Server2',
  MASTER_PORT = 3306,
  MASTER_USER = 'replica',
@@ -74,10 +74,10 @@ START SLAVE;
 - MASTER_PASSWORD: Server2で指定したパスワードを指定する。
 - MASTER_CONNECT_RETRY: 接続を試行する間隔を指定する（デフォルトは60秒）
 - MASTER_USE_GTID: マスタのGTIDを指定する。
-  
+
 ## Server2の設定
 
-### 設定ファイルの変更 
+### 設定ファイルの変更
 
 つぎの内容のファイルを作成し、/etc/my.cnf.d 配下に配置する。仮にmysql.cnfとする。
 
@@ -103,11 +103,11 @@ master_retry_count=0
 - replicate-do-table: レプリケーションを実行するテーブルを指定する。
 - replicate-ignore-table: レプリケーションを実行しないテーブルを指定する。
 - master_retry_count: マスタに接続できない場合に接続を試みる回数を指定する（0:無限）。
-  
+
   サーバを再起動する。
 
 ```
-# systemctl restart mysqld 
+# systemctl restart mysqld
 ```
 
 ### マスタ/スレーブの設定
@@ -123,7 +123,7 @@ GRANT REPLICATION SLAVE ON *.* TO 'replica'@'%';
 
 スレーブの設定を行う。
 ```
-CHANGE MASTER TO 
+CHANGE MASTER TO
  MASTER_HOST = 'Server1',
  MASTER_PORT = 3306,
  MASTER_USER = 'replica',
