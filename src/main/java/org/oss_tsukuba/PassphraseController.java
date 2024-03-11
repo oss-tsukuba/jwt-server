@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import jp.co.canaly.mcp.util.PropUtils;
+
 @Controller
 public class PassphraseController {
 
@@ -42,8 +44,7 @@ public class PassphraseController {
     @Value("${other-jwt-server:}")
     private String otherUrl;
 
-    @Value("${version:0.0.0}")
-    private String version;
+    private String version = PropUtils.getValue("version");
 
     private DateFormat formatter = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 
