@@ -23,7 +23,7 @@
        <br>
        <br>
        <div class="box">
-         <span class="h3">USER : </span> <span class="h2" th:text="${user}"></span>
+         <span class="h3">USER: </span> <span class="h2" th:text="${user}"></span>
          <br>
          <br>
 
@@ -42,7 +42,7 @@
             </div>
 
             <br>
-            <span class="h4">Date of Issue : </span> <span class="h4" th:text="${date}"></span>
+            <span class="h4">Date of Issue: </span> <span class="h4" th:text="${date}"></span>
 
        </div>
           <br>
@@ -52,10 +52,10 @@
           <br>
           <br>
           <th:block th:if="${redundancy}">
-            <span class="h2 passphrase" th:text="'jwt-agent -s ' + ${uri} + ' -s ' + ${otherUrl} + ' -l ' + ${user}" id="usage"></span>
+            <span class="h2 passphrase" th:text="'jwt-agent ' + ${otherUrl} + ' -l ' + ${user}" id="usage"></span>
           </th:block>
           <th:block th:unless="${redundancy}">
-            <span class="h2 passphrase" th:text="'jwt-agent -s ' + ${uri} + ' -l ' + ${user}" id="usage"></span>
+            <span class="h2 passphrase" th:text="'jwt-agent ' + ${uri} + ' -l ' + ${user}" id="usage"></span>
           </th:block>
           <button onclick="copyToClipboard('usage')">copy</button>
 
@@ -64,11 +64,12 @@
           <br>
           <details>
             <summary class="h3">Access Token</summary>
-            expired : <span th:text="${exp}"></span> <span th:text="${offset}"></span> <button onclick="copyToClipboard('token')">copy</button>
+            expiration: <span th:text="${exp}"></span> <span th:text="${offset}"></span>
 
             <div class="box">
               <div class="token" th:text="${token}" id="token"></div>
             </div>
+            <button onclick="copyToClipboard('token')">copy</button>
           </details>
 
       </span>

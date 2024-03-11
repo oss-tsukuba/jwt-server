@@ -41,8 +41,8 @@ public class PassphraseController {
     @Value("${user-claim:}")
     private String userClaim;
 
-    @Value("${other-jwt-server:}")
-    private String otherUrl;
+    @Value("${replicated-jwt-servers:}")
+    private String replicatedServers;
 
     private String version = PropUtils.getValue("version");
 
@@ -75,7 +75,7 @@ public class PassphraseController {
 
         String uri = ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString();
         uri = uri.replace("passphrase", "");
-        model.addAttribute("uri", uri);
+        model.addAttribute("uri", "-s " + uri);
 
         String ipAddr = request.getRemoteAddr();
         String hostname = request.getRemoteHost();
@@ -84,9 +84,24 @@ public class PassphraseController {
         issueRepository.save(issue);
         model.addAttribute("date", formatter.format(issue.getDate()));
         model.addAttribute("offset", OffsetDateTime.now().getOffset());
-        model.addAttribute("redundancy", !"".equals(otherUrl));
-        model.addAttribute("otherUrl", otherUrl);
 
+        model.addAttribute("redundancy", false);
+
+        if (replicatedServers != null && !"".equals(replicatedServers)) {
+        	String[] servers = replicatedServers.split(" ");
+        	String otherUrl = "-s " + uri;
+        	boolean otherExist = false;
+
+        	for (String server: servers) {
+        		if (!uri.equals(server)) {
+        			otherExist = true;
+            		otherUrl += (" -s " + server);
+        		}
+        	}
+
+            model.addAttribute("redundancy", otherExist);
+            model.addAttribute("otherUrl", otherUrl);
+        }
         return "passphrase";
     }
 
