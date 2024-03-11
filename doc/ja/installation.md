@@ -224,7 +224,7 @@ replicated-jwt-servers=
 
   - replicated-jwt-servers
 
-    JWT Serverを冗長化して場合に複数のJWT ServerのURLを設定すると冗長化したJWT Serverの利用方法が表示される。必要ない場合は設定しなくてもよい。
+    JWT Serverを冗長化して場合に複数のJWT ServerのURLを空白区切りで設定する。設定すると冗長化したJWT Serverの利用方法が表示される。必要ない場合は設定しなくてもよい。
     
 ### jwt-serverのビルド
 
