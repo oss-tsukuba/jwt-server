@@ -219,13 +219,13 @@ replicated-jwt-servers=
     データベースのスキーマの生成方法を設定する。
 
   - contact-info
-  
+
     エラー画面に表示する管理者の連絡先等を設定する。必要ない場合は設定しなくてもよい。
 
   - replicated-jwt-servers
 
     JWT Serverを冗長化して場合に複数のJWT ServerのURLを空白区切りで設定する。設定すると冗長化したJWT Serverの利用方法が表示される。必要ない場合は設定しなくてもよい。
-    
+
 ### jwt-serverのビルド
 
 ```
