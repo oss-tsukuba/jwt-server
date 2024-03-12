@@ -33,14 +33,7 @@ $ git clone https://github.com/oss-tsukuba/jwt-server.git
 ### mariadb パッケージのインストール
 
 ```
-# dnf install -y mariadb mariadb-server
-```
-
-### mysqlの起動と自動起動設定
-
-```
-# systemctl enable mariadb
-# systemctl start mariadb
+# dnf install -y mariadb-server
 ```
 
 ### 環境設定
@@ -60,10 +53,11 @@ skip-character-set-client-handshake
 default-character-set = utf8mb4
 ```
 
-### mysqlの再起動
+### mysqlの起動と自動起動設定
 
 ```
-# systemctl restart mariadb
+# systemctl enable mariadb
+# systemctl start mariadb
 ```
 
 ### ユーザ＆データベースの作成
@@ -71,9 +65,9 @@ default-character-set = utf8mb4
 jwt-serverからアクセスするためのユーザを作成する。仮に、ユーザ名をjwtserver、パスワードをDBPASSWORD、データベース名をjwtserverdbとする。
 ```
 $ mysql -u root
-MariaDB [(none)]> CREATE USER 'jwtserver'@'localhost' IDENTIFIED BY ‘DBPASSWORD';
+MariaDB [(none)]> CREATE USER 'jwtserver'@'localhost' IDENTIFIED BY 'DBPASSWORD';
 MariaDB [(none)]> CREATE DATABASE jwtserverdb;
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON jwtserverdb . \* TO 'jwtserver'@'localhost';
+MariaDB [(none)]> GRANT ALL PRIVILEGES ON jwtserverdb.* TO 'jwtserver'@'localhost';
 MariaDB [(none)]> FLUSH PRIVILEGES;
 MariaDB [(none)]> quit
 ```
@@ -142,26 +136,34 @@ Enter password: DBPASSWORD …データベース・ユーザーのパスワー�
 
 （設定例)
 ```
-# change keycloak settings
+# Keycloak settings
 keycloak.enabled=true
 keycloak.auth-server-url=https://keycloak.example.org:443/auth …KeycloakサーバーのURLを記載
 keycloak.realm=realm
 keycloak.resource=clientId
 keycloak.public-client=false
 keycloak.credentials.secret=KEYCLOAK_SECRET
-user-claim=hoge.id
+
+# OAuth2 claim for user name
+user-claim=userclaim
+
+# contact address
+contact-info=
+
+# set redundant jwt-server's URLs
+replicated-jwt-servers=
 
 # MySQL settings
 spring.datasource.url=jdbc:mysql://${MYSQL_HOST:localhost}:3306/jwtserverdb …ホスト部にlocalhost、パス部にデータベース名を記載
 spring.datasource.username=jwtserver …データベース・ユーザー名を記載
 spring.datasource.password=DBPASSWORD …データベース・ユーザー用パスワードを記載
+# don't change below
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.jpa.database=MYSQL
 spring.jpa.hibernate.ddl-auto=update
 
-# others
-contact-info=
-replicated-jwt-servers=
+# spring settings
+spring.main.allow-circular-references=true
 ```
 
 各設定値の内容は以下の通りである。
@@ -184,7 +186,7 @@ replicated-jwt-servers=
 
   - keycloak.public-client
 
-    クライアントがpublicか否かを設定する。HPCI環境におけるjwt-serverはconfidentialクライアントとして運用するため、falseを設定する
+    クライアントがpublicか否かを設定する。confidentialクライアントとして運用する場合は、falseを設定する
 
   - keycloak.credentials.secret
 
@@ -193,6 +195,14 @@ replicated-jwt-servers=
   - user-claim
 
     ユーザIDとして利用するトークンのクレームを設定する。
+
+  - contact-info
+
+    エラー画面に表示する管理者の連絡先等を設定する。必要ない場合は設定しなくてもよい。
+
+  - replicated-jwt-servers
+
+    JWT Serverを冗長化して場合に複数のJWT ServerのURLを空白区切りで設定する。設定すると冗長化したJWT Serverの利用方法が表示される。必要ない場合は設定しなくてもよい。
 
   - spring.datasource.url
 
@@ -208,23 +218,15 @@ replicated-jwt-servers=
 
   - spring.datasource.driver-class-name
 
-    ユーザのパスワードを設定する。
+    ドライバのクラス名を設定する。変更不要です。
 
   - spring.jpa.database
 
-    データベース（DBMS）の種類を設定する。
+    データベース（DBMS）の種類を設定する。変更不要です。
 
   - spring.jpa.hivernate.ddl-auto
 
-    データベースのスキーマの生成方法を設定する。
-
-  - contact-info
-
-    エラー画面に表示する管理者の連絡先等を設定する。必要ない場合は設定しなくてもよい。
-
-  - replicated-jwt-servers
-
-    JWT Serverを冗長化して場合に複数のJWT ServerのURLを空白区切りで設定する。設定すると冗長化したJWT Serverの利用方法が表示される。必要ない場合は設定しなくてもよい。
+    データベースのスキーマの生成方法を設定する。変更不要です。
 
 ### jwt-serverのビルド
 
@@ -257,7 +259,7 @@ ProxyPassReverse / ajp://localhost:8009/ secret=TQJvCWhkNjULELwF
 SELinuxの設定を変更し、tomcatへのネットワーク接続を許可する。
 
 ```
-# setsebool -P httpd\_can\_network\_connect 1
+# setsebool -P httpd_can_network_connect 1
 ```
 
 ### apache httpd の自動起動設定および起動

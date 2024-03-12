@@ -6,8 +6,7 @@
 ## 本書前提
 
 * JWT Serverが利用するMariaDB Serverの設定ができている（JWT Serverのインストールマニュアル参照）
-* データベース名はgfarmdbとする
-* gfarmdbにアクセスするユーザはgfarmとする
+* データベース名はjwtserverdbとする
 * ２台のJWT Serverでの冗長構成とし、それぞれが利用するMariaDB ServerをServer1、Server2と呼ぶ
 
 ## Server1の設定
@@ -25,8 +24,8 @@ log-basename=master1
 auto_increment_increment=5
 auto_increment_offset=1
 
-replicate-do-table=gfarmdb.tokens
-replicate-ignore-table=gfarmdb.errors
+replicate-do-table=jwtserverdb.tokens
+replicate-ignore-table=jwtserverdb.errors
 
 master_retry_count=0
 ```
@@ -42,12 +41,10 @@ master_retry_count=0
   サーバを再起動する。
 
 ```
-# systemctl restart mysqld
+# systemctl restart mysql
 ```
 
 ### マスタ/スレーブの設定
-
-ユーザgfarmでgfarmdbに接続し下記を実行する。
 
 レプリケーション用のユーザ（replica）を作成し権限を設定する。パスワード（PASSWORD）はServer2の設定で利用する。
 ```
@@ -90,8 +87,8 @@ log-basename=master2
 auto_increment_increment=5
 auto_increment_offset=2
 
-replicate-do-table=gfarmdb.tokens
-replicate-ignore-table=gfarmdb.errors,gfarmdb.issues
+replicate-do-table=jwtserverdb.tokens
+replicate-ignore-table=jwtserverdb.errors,jwtserverdb.issues
 
 master_retry_count=0
 ```
@@ -107,12 +104,10 @@ master_retry_count=0
   サーバを再起動する。
 
 ```
-# systemctl restart mysqld
+# systemctl restart mysql
 ```
 
 ### マスタ/スレーブの設定
-
-ユーザgfarmでgfarmdbに接続し下記を実行する。
 
 レプリケーション用のユーザ（replica）を作成し権限を設定する。パスワード（PASSWORD）はServer1の設定で利用する。
 ```
