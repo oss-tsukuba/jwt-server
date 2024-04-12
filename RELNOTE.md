@@ -1,3 +1,11 @@
+Release note for JWT server 1.0.1
+=================================
+
+[2024.4.12]
+
+### New application properties
+* replicated-jwt-servers - specifies replicated JWT servers for displaying jwt-agent usage.
+
 Release note for JWT server 1.0.0
 =================================
 
