@@ -1,4 +1,4 @@
-package jp.co.canaly.mcp.util;
+package org.oss_tsukuba.utils;
 
 import java.util.ResourceBundle;
 

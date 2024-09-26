@@ -4,9 +4,10 @@ import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
+import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
@@ -14,17 +15,23 @@ import org.oss_tsukuba.dao.Issue;
 import org.oss_tsukuba.dao.IssueRepository;
 import org.oss_tsukuba.service.TokenService;
 import org.oss_tsukuba.utils.KeycloakUtil;
+import org.oss_tsukuba.utils.PropUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
+import org.springframework.security.oauth2.client.oidc.authentication.ReactiveOidcIdTokenDecoderFactory;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoderFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import jp.co.canaly.mcp.util.PropUtils;
 
 @Controller
 public class PassphraseController {
@@ -88,16 +95,16 @@ public class PassphraseController {
         model.addAttribute("redundancy", false);
 
         if (replicatedServers != null && !"".equals(replicatedServers)) {
-        	String[] servers = replicatedServers.split(" ");
-        	String otherUrl = "-s " + uri;
-        	boolean otherExist = false;
+            String[] servers = replicatedServers.split(" ");
+            String otherUrl = "-s " + uri;
+            boolean otherExist = false;
 
-        	for (String server: servers) {
-        		if (!uri.equals(server)) {
-        			otherExist = true;
-            		otherUrl += (" -s " + server);
-        		}
-        	}
+            for (String server: servers) {
+                if (!uri.equals(server)) {
+                    otherExist = true;
+                    otherUrl += (" -s " + server);
+                }
+            }
 
             model.addAttribute("redundancy", otherExist);
             model.addAttribute("otherUrl", otherUrl);
@@ -129,9 +136,4 @@ public class PassphraseController {
         return "issues";
     }
 
-    @GetMapping(path = "/logout")
-    public String logout(HttpServletRequest request) throws ServletException {
-        request.logout();
-        return "redirect:menu";
-    }
 }

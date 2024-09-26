@@ -44,7 +44,10 @@
             <a href="errors" role="button">Authentication Errors</a>
           </li>
           <li class="btn triple">
-            <a href="logout" role="button" onclick="return confirm('Invalidate your all tokens?');">Invalidate All Tokens</a>
+            <form method="post" name="form1" action="logout">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <a href="javascript:form1.submit()" role="button" onclick="return confirm('Invalidate your all tokens?');">Invalidate All Tokens</a>
+            </form>
           </li>
         </ul>
       </div>

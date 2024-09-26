@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -27,12 +27,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
@@ -57,16 +58,13 @@ public class JwtController {
     @Autowired
     private TokenService tokenService;
 
-    @Value("${keycloak.auth-server-url}")
+    @Value("${spring.security.oauth2.client.provider.keycloak.issuer-uri}")
     private String baseUrl;
 
-    @Value("${keycloak.realm}")
-    private String realm;
-
-    @Value("${keycloak.resource}")
+    @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
     private String clientId;
 
-    @Value("${keycloak.credentials.secret}")
+    @Value("${spring.security.oauth2.client.registration.keycloak.client-secret}")
     private String secret;
 
     @Value("${jwt-server.passphrase:}")
@@ -116,7 +114,7 @@ public class JwtController {
     private String getJwt(String refreshToken) {
         String jwt = null;
 
-        String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+        String url = baseUrl + "/protocol/openid-connect/token";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -132,9 +130,9 @@ public class JwtController {
         try {
             ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
 
-            HttpStatus responseHttpStatus = result.getStatusCode();
+            HttpStatusCode responseHttpStatusCode = result.getStatusCode();
 
-            if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
+            if (responseHttpStatusCode.equals(HttpStatus.OK)) { // 200
                 jwt = result.getBody();
             }
         } catch (HttpClientErrorException e) {
@@ -186,7 +184,7 @@ public class JwtController {
         return "ok";
     }
 
-    @RequestMapping(value = "/init_jwt", method = RequestMethod.POST)
+    @PostMapping("/init_jwt")
     public String initJwt(@RequestParam(name = "passphrase", required = true) String passphrase,
             @RequestParam(name = "user", required = true) String user,
             @RequestParam(name = "password", required = true) String password, HttpServletRequest request) {
@@ -219,7 +217,7 @@ public class JwtController {
         return null;
     }
 
-    @RequestMapping(value = "/chpass", method = RequestMethod.POST)
+    @PostMapping("/chpass")
     public String changePassphrase(@RequestParam(name = "user", required = true) String user,
             @RequestParam(name = "pass", required = true) String pass, HttpServletRequest request) {
         String ipAddr = request.getRemoteAddr();
@@ -286,7 +284,7 @@ public class JwtController {
         return newPassphrase;
     }
 
-    @RequestMapping(value = "/jwt", method = RequestMethod.POST)
+    @PostMapping("/jwt")
     public String getJwt(@RequestParam(name = "user", required = true) String user,
             @RequestParam(name = "pass", required = true) String pass, HttpServletRequest request) {
         String ipAddr = request.getRemoteAddr();

@@ -11,13 +11,11 @@ import java.util.Date;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
 import org.oss_tsukuba.dao.Token;
 import org.oss_tsukuba.dao.TokenRepository;
+import org.oss_tsukuba.oauth2.EnhancedOAuth2AuthenticationToken;
 import org.oss_tsukuba.utils.CryptUtil;
 import org.oss_tsukuba.utils.Damm;
 import org.oss_tsukuba.utils.KeycloakUtil;
@@ -27,8 +25,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
@@ -47,16 +51,13 @@ public class TokenServiceImpl implements TokenService {
     @Autowired
     ErrorRepository errorRepository;
 
-    @Value("${keycloak.auth-server-url}")
+    @Value("${spring.security.oauth2.client.provider.keycloak.issuer-uri}")
     private String baseUrl;
 
-    @Value("${keycloak.realm}")
-    private String realm;
-
-    @Value("${keycloak.resource}")
+    @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
     private String clientId;
 
-    @Value("${keycloak.credentials.secret}")
+    @Value("${spring.security.oauth2.client.registration.keycloak.client-secret}")
     private String secret;
 
     @Value("${user-claim:}")
@@ -66,9 +67,8 @@ public class TokenServiceImpl implements TokenService {
 
     static private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public TokenServiceImpl(RestTemplate restTemplate) {
-        super();
-        this.restTemplate = restTemplate;
+    public TokenServiceImpl() {
+        this.restTemplate = new RestTemplate();
     }
 
     private String getExpDate(String token) {
@@ -79,7 +79,7 @@ public class TokenServiceImpl implements TokenService {
             String json = new String(Base64.getDecoder().decode(jwts[1]));
 
             try {
-                JSONObject  jsonObj = (JSONObject) new JSONParser().parse(json);
+                JSONObject jsonObj = (JSONObject) new JSONParser().parse(json);
 
                 Long exp = (Long) jsonObj.get(EXP_CLAIM);
                 Instant instant = Instant.ofEpochSecond(exp);
@@ -98,88 +98,86 @@ public class TokenServiceImpl implements TokenService {
     public void getToken(Principal principal, Model model) {
         String jwt = null;
 
-        if (principal instanceof KeycloakAuthenticationToken) {
-            Object obj = ((KeycloakAuthenticationToken) principal).getPrincipal();
+        if (principal instanceof EnhancedOAuth2AuthenticationToken) {
+            EnhancedOAuth2AuthenticationToken oauth2token = (EnhancedOAuth2AuthenticationToken) principal;
 
-            if (obj instanceof KeycloakPrincipal<?>) {
-                KeycloakPrincipal<?> keycloakPrincipal = (KeycloakPrincipal<?>) obj;
-                String user = KeycloakUtil.getUserName(principal, userClaim);
-                String rToken = ((RefreshableKeycloakSecurityContext) keycloakPrincipal.getKeycloakSecurityContext())
-                        .getRefreshToken();
+            String user = KeycloakUtil.getUserName(principal, userClaim);
+            String rToken = oauth2token.getRefreshToken().getTokenValue();
 
-                String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+            String url = baseUrl + "/protocol/openid-connect/token";
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-                MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-                params.add("grant_type", "refresh_token");
-                params.add("client_id", clientId);
-                params.add("refresh_token", rToken);
-                params.add("client_secret", secret);
-                HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(
-                        params, headers);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+            params.add("grant_type", "refresh_token");
+            params.add("client_id", clientId);
+            params.add("refresh_token", rToken);
+            params.add("client_secret", secret);
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
+                    headers);
 
-                try {
-                    ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
+            try {
+                ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
 
-                    HttpStatus responseHttpStatus = result.getStatusCode();
+                HttpStatusCode responseHttpStatus = result.getStatusCode();
 
-                    if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
-                        jwt = result.getBody();
-                    } else {
-                        model.addAttribute("error", 2);
-                        Error error = new Error(user, "", "jwt-server", UNEXPECTED_ERROR);
-                        errorRepository.save(error);
-
-                        LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(), error.getIpAddr()));
-                    }
-
-                    if (jwt != null) {
-                        LogUtils.trace(jwt);
-
-                        String accessToken = null;
-                        String refreshToken = null;
-
-                        try {
-                            JSONObject js = (JSONObject) new JSONParser().parse(jwt);
-                            accessToken = (String) js.get("access_token");
-                            refreshToken = (String) js.get("refresh_token");
-                        } catch (ParseException e) {
-                            LogUtils.error(e.toString(), e);
-                        }
-
-                        Damm dmm = new Damm();
-
-                        String key = dmm.getPassphrase();
-                        String passphrase = key + dmm.damm32Encode(key.toCharArray());
-
-                        model.addAttribute("passphrase", passphrase);
-                        model.addAttribute("user", user);
-                        model.addAttribute("token", accessToken);
-
-                        String expDate = getExpDate(accessToken);
-                        model.addAttribute("exp", expDate);
-
-                        try {
-                            byte[] iv = CryptUtil.generateIV();
-                            byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
-                            byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
-
-                            tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
-                                    Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
-
-                            LogUtils.info(String.format("User:%s changed passphrase from Web Browser", user));
-                        } catch (Exception e) {
-                            LogUtils.error(e.toString(), e);
-                        }
-                    }
-                }catch (RestClientException e) {
-                    model.addAttribute("error", 1);
-                    Error error = new Error(user, "", "jwt-server", SERVER_DOWN);
+                if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
+                    jwt = result.getBody();
+                } else {
+                    model.addAttribute("error", 2);
+                    Error error = new Error(user, "", "jwt-server", UNEXPECTED_ERROR);
                     errorRepository.save(error);
 
-                    LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(), error.getIpAddr()));
+                    LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(),
+                            error.getIpAddr()));
                 }
+
+                if (jwt != null) {
+                    LogUtils.trace(jwt);
+
+                    String accessToken = null;
+                    String refreshToken = null;
+
+                    try {
+                        JSONObject js = (JSONObject) new JSONParser().parse(jwt);
+                        accessToken = (String) js.get("access_token");
+                        refreshToken = (String) js.get("refresh_token");
+                    } catch (ParseException e) {
+                        LogUtils.error(e.toString(), e);
+                    }
+
+                    Damm dmm = new Damm();
+
+                    String key = dmm.getPassphrase();
+                    String passphrase = key + dmm.damm32Encode(key.toCharArray());
+
+                    model.addAttribute("passphrase", passphrase);
+                    model.addAttribute("user", user);
+                    model.addAttribute("token", accessToken);
+
+                    String expDate = getExpDate(accessToken);
+                    model.addAttribute("exp", expDate);
+
+                    try {
+                        byte[] iv = CryptUtil.generateIV();
+                        byte[] enc1 = CryptUtil.encrypt(accessToken.getBytes(), key, iv);
+                        byte[] enc2 = CryptUtil.encrypt(refreshToken.getBytes(), key, iv);
+
+                        tokenRepository.save(new Token(user, clientId, Base64.getEncoder().encodeToString(enc1),
+                                Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
+
+                        LogUtils.info(String.format("User:%s changed passphrase from Web Browser", user));
+                    } catch (Exception e) {
+                        LogUtils.error(e.toString(), e);
+                    }
+                }
+            } catch (RestClientException e) {
+                model.addAttribute("error", 1);
+                Error error = new Error(user, "", "jwt-server", SERVER_DOWN);
+                errorRepository.save(error);
+
+                LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(),
+                        error.getIpAddr()));
             }
         }
     }
@@ -188,7 +186,7 @@ public class TokenServiceImpl implements TokenService {
     public String getToken(String user, String pass) {
         String jwt = null;
 
-        String url = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+        String url = baseUrl + "/protocol/openid-connect/token";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -203,7 +201,7 @@ public class TokenServiceImpl implements TokenService {
 
         ResponseEntity<String> result = new RestTemplate().postForEntity(url, request, String.class);
 
-        HttpStatus responseHttpStatus = result.getStatusCode();
+        HttpStatusCode responseHttpStatus = result.getStatusCode();
 
         if (responseHttpStatus.equals(HttpStatus.OK)) { // 200
             jwt = result.getBody();
