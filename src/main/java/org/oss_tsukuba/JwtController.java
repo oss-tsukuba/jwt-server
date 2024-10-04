@@ -15,6 +15,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
+import org.oss_tsukuba.dao.Issue;
+import org.oss_tsukuba.dao.IssueRepository;
 import org.oss_tsukuba.dao.Token;
 import org.oss_tsukuba.dao.TokenKey;
 import org.oss_tsukuba.dao.TokenRepository;
@@ -54,6 +56,9 @@ public class JwtController {
 
     @Autowired
     ErrorRepository errorRepository;
+
+    @Autowired
+    private IssueRepository issueRepository;
 
     @Autowired
     private TokenService tokenService;
@@ -281,6 +286,9 @@ public class JwtController {
             errorMap.remove(user);
         }
 
+        Issue issue = new Issue(user, ipAddr, hostname, Issue.CHANGE_PASSPHRASE);
+        issueRepository.save(issue);
+
         return newPassphrase;
     }
 
@@ -362,6 +370,9 @@ public class JwtController {
         if (errorMap.containsKey(user)) {
             errorMap.remove(user);
         }
+
+        Issue issue = new Issue(user, ipAddr, hostname, Issue.TOKEN);
+        issueRepository.save(issue);
 
         return accessToken;
     }

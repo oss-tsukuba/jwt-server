@@ -4,9 +4,7 @@ import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
-import java.util.Map;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.oss_tsukuba.dao.Error;
@@ -18,15 +16,8 @@ import org.oss_tsukuba.utils.KeycloakUtil;
 import org.oss_tsukuba.utils.PropUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
-import org.springframework.security.oauth2.client.oidc.authentication.ReactiveOidcIdTokenDecoderFactory;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoderFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -86,9 +77,13 @@ public class PassphraseController {
 
         String ipAddr = request.getRemoteAddr();
         String hostname = request.getRemoteHost();
+
+        if (hostname.equals(ipAddr)) {
+            hostname = "";
+        }
+
         String user = KeycloakUtil.getUserName(principal, userClaim);
-        Issue issue = new Issue(user, ipAddr, hostname);
-        issueRepository.save(issue);
+        Issue issue = new Issue(user, ipAddr, hostname, Issue.PASSPHRASE);
         model.addAttribute("date", formatter.format(issue.getDate()));
         model.addAttribute("offset", OffsetDateTime.now().getOffset());
 
@@ -109,6 +104,9 @@ public class PassphraseController {
             model.addAttribute("redundancy", otherExist);
             model.addAttribute("otherUrl", otherUrl);
         }
+
+        issueRepository.save(issue);
+
         return "passphrase";
     }
 

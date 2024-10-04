@@ -25,6 +25,7 @@
             <th class="item1">Time (<span th:text="${offset}"></span>)</th>
             <th class="item3">IP Address</th>
             <th class="item4">Host Name</th>
+            <th class="item5">kind</th>
           </tr>
         </thead>
         <tbody>
@@ -32,6 +33,7 @@
             <td th:text="${issue.dispDate}"></td>
             <td th:text="${issue.ipAddr}"></td>
             <td th:text="${issue.hostname}"></td>
+            <td th:text="${issue.dispType}"></td>
           </tr>
         </tbody>
       </table>
