@@ -5,8 +5,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
 import org.oss_tsukuba.dao.Issue;
@@ -23,6 +21,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class PassphraseController {
@@ -128,7 +128,7 @@ public class PassphraseController {
         Page<Issue> issues = issueRepository.findByUserOrderByIdDesc(pageable, user);
         model.addAttribute("page", issues);
         model.addAttribute("issues", issues.getContent());
-        model.addAttribute("url", "errors");
+        model.addAttribute("url", "issues");
         model.addAttribute("offset", OffsetDateTime.now().getOffset());
 
         return "issues";
