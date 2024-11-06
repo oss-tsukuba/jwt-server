@@ -14,7 +14,7 @@ JWT servers can be redundant using DBMS multi-source replication.  When `jwt-age
 
 # Build Requirements
 
-- JDK (11 or later)
+- JDK (17 or later)
 - Apache Maven (3.2 or later)
 
 # Build jwt-server war file
@@ -29,15 +29,13 @@ Specify the realm and the confidential client on Keycloak.
 Change below for the Keycloak.
 
 ```
-keycloak.auth-server-url=https://${KEYCLOAK}:8443/auth
-keycloak.realm=${REALM}
-keycloak.resource=${CLIENT}
-keycloak.credentials.secret=${CONFIDENTIAL}
+spring.security.oauth2.client.registration.keycloak.client-id=${CLIENT}
+spring.security.oauth2.client.registration.keycloak.client-secret=${CONFIDENTIAL}
+spring.security.oauth2.client.provider.keycloak.issuer-uri=https://${KEYCLOAK}:8443/auth/realms/${REALM}
 ```
-- keycloak.auth-server-url: Keycloak's authentication url
-- keycloak.realm: Realm name
-- keycloak.resource: Client name
-- keycloak.credentials.secret: Confidential code for the client
+- spring.security.oauth2.client.provider.keycloak.issuer-uri: Keycloak's authentication url
+- spring.security.oauth2.client.registration.keycloak.client-id: Client name
+- spring.security.oauth2.client.registration.keycloak.client-secret: Confidential code for the client
 
 ### OAuth2 token setting
 
@@ -88,5 +86,5 @@ mvn package
 
 # Deploy the JWT server
 
-Deploy `jwt-server.war` on the web application server like tomcat.
+Deploy `jwt-server.war` on the web application server like tomcat(10 or later).
 

@@ -28,6 +28,16 @@ Rocky Linux 9を前提とする。
 $ git clone https://github.com/oss-tsukuba/jwt-server.git
 ```
 
+## JDKのインストールと設定
+
+OpenJDK21のパッケージをインストールし、Java環境を設定する。
+
+```
+# dnf -y install java-21-openjdk-devel
+# alternatives --set java java-21-openjdk.x86_64
+# alternatives --set javac java-21-openjdk.x86_64
+```
+
 ## mariadbのインストールと設定
 
 ### mariadb パッケージのインストール
@@ -81,10 +91,65 @@ Enter password: DBPASSWORD …データベース・ユーザーのパスワー�
 
 ## tomcat のインストールと設定
 
-### tomcatパッケージのインストール
+### tomcatのインストール
+
+tomcat10をダウンロードして解凍する。
+今後の運用のためにシンボリックリンクも作成しておく。
+本書ではバージョン10.1.31を利用しているが新しいバージョンが
+リリースされている場合にはバージョンを置き換えることで利用できる。
 
 ```
-# dnf -y install tomcat
+% wget https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.31/bin/apache-tomcat-10.1.31.tar.gz
+% sudo tar -xf apache-tomcat-10.1.31.tar.gz -C /opt
+% sudo ln -s /opt/apache-tomcat-10.1.31 /opt/tomcat
+```
+
+tomcatの実行用ユーザtomcatを作成する。
+
+```
+# useradd -s /sbin/nologin tomcat
+```
+
+ただし、RHEL系Linuxでtomcatユーザ用に予約されているUIDとして53を利用する場合には下記のようにオプションをつけてユーザを作成する。
+
+```
+# useradd -u 53 -s /sbin/nologin tomcat
+```
+
+ファイルのオーナーをtomcatに変更する。
+
+```
+# chown -R tomcat: /opt/apache-tomcat-10.1.31
+```
+
+シェルスクリプトを実行可能にする。
+
+```
+# chmod +x /opt/tomcat/bin/*.sh
+```
+起動用のファイルを作成する。
+
+```
+# vi /etc/systemd/system/tomcat.service
+```
+
+（新規作成）
+```
+[Unit]
+Description=Apache Tomcat 10 Web Application Server
+After=network.target
+[Service]
+User=tomcat
+Type=oneshot
+PIDFile=/opt/tomcat/tomcat.pid
+RemainAfterExit=yes
+
+ExecStart=/opt/tomcat/bin/startup.sh
+ExecStop=/opt/tomcat/bin/shutdown.sh
+ExecReStart=/opt/tomcat/bin/shutdown.sh;/opt/tomcat/bin/startup.sh
+
+[Install]
+WantedBy=multi-user.target
 ```
 
 ### apache httpdと連携するポートの設定
@@ -137,12 +202,13 @@ Enter password: DBPASSWORD …データベース・ユーザーのパスワー�
 （設定例)
 ```
 # Keycloak settings
-keycloak.enabled=true
-keycloak.auth-server-url=https://keycloak.example.org:443/auth …KeycloakサーバーのURLを記載
-keycloak.realm=realm
-keycloak.resource=clientId
-keycloak.public-client=false
-keycloak.credentials.secret=KEYCLOAK_SECRET
+spring.security.oauth2.client.registration.keycloak.client-id=CLIENT_ID … クライアントIDを記載
+spring.security.oauth2.client.registration.keycloak.client-secret=KEYCLOAK_SECRET … シークレットを記載
+spring.security.oauth2.client.registration.keycloak.provider=keycloak
+spring.security.oauth2.client.registration.keycloak.scope=openid
+spring.security.oauth2.client.registration.keycloak.authorization-grant-type=authorization_code
+spring.security.oauth2.client.provider.keycloak.issuer-uri=https://keycloak.example.org:443/auth/realms/REALM … REALMを含めたKeycloakサーバーのURLを記載
+
 
 # OAuth2 claim for user name
 user-claim=userclaim
@@ -168,29 +234,17 @@ spring.main.allow-circular-references=true
 
 各設定値の内容は以下の通りである。
 
-  - keycloak.enabled
-
-    Keycloak Spring Boot アダプターの有効/無効を設定する。trueを設定する。
-
-  - keycloak.auth-server-url
-
-    KeycloakサーバのURLを設定する。
-
-  - keycloak.realm
-
-    レルムを設定する。
-
-  - keycloak.resource
+  - spring.security.oauth2.client.registration.keycloak.client-id
 
     jwt-serverのクライアントIDを設定する。
 
-  - keycloak.public-client
-
-    クライアントがpublicか否かを設定する。confidentialクライアントとして運用する場合は、falseを設定する
-
-  - keycloak.credentials.secret
+  - spring.security.oauth2.client.registration.keycloak.client-secret
 
     クライアントのシークレットを設定する。
+
+ - spring.security.oauth2.client.provider.keycloak.issuer-uri
+
+    レルムを含めたKeycloakサーバのURLを設定する。
 
   - user-claim
 
