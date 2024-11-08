@@ -33,9 +33,9 @@ spring.security.oauth2.client.registration.keycloak.client-id=${CLIENT}
 spring.security.oauth2.client.registration.keycloak.client-secret=${CONFIDENTIAL}
 spring.security.oauth2.client.provider.keycloak.issuer-uri=https://${KEYCLOAK}:8443/auth/realms/${REALM}
 ```
-- spring.security.oauth2.client.provider.keycloak.issuer-uri: Keycloak's authentication url
 - spring.security.oauth2.client.registration.keycloak.client-id: Client name
 - spring.security.oauth2.client.registration.keycloak.client-secret: Confidential code for the client
+- spring.security.oauth2.client.provider.keycloak.issuer-uri: Keycloak's authentication url
 
 ### OAuth2 token setting
 
@@ -86,5 +86,5 @@ mvn package
 
 # Deploy the JWT server
 
-Deploy `jwt-server.war` on the web application server like tomcat(10 or later).
+Deploy `jwt-server.war` on the web application server like tomcat (10 or later).
 

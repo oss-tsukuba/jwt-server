@@ -30,7 +30,7 @@ $ git clone https://github.com/oss-tsukuba/jwt-server.git
 
 ## JDKのインストールと設定
 
-OpenJDK21のパッケージをインストールし、Java環境を設定する。
+JDK17以上が必要なのでOpenJDK21のパッケージをインストールし、Java環境を設定する。
 
 ```
 # dnf -y install java-21-openjdk-devel
@@ -92,6 +92,9 @@ Enter password: DBPASSWORD …データベース・ユーザーのパスワー�
 ## tomcat のインストールと設定
 
 ### tomcatのインストール
+
+tomcat10以上が必要なのでパッケージが存在しなければ下記の手順にてインストールする。
+パッケージが存在すればパッケージを利用すればよい。
 
 tomcat10をダウンロードして解凍する。
 今後の運用のためにシンボリックリンクも作成しておく。
