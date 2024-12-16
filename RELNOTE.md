@@ -1,3 +1,14 @@
+Release note for JWT server 1.1.0
+=================================
+
+[2024.12.16]
+
+### New feature
+* use "Spring Oauth2 Client" instead of "Keycloak Spring Security Adapter"
+
+### Updatd feature
+* record token issues
+
 Release note for JWT server 1.0.1
 =================================
 
