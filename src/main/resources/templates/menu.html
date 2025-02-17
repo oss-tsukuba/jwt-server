@@ -19,10 +19,21 @@
     <div class="block">
       <div class="menu">
         <ul>
-          <li class="btn triple">
+          <li class="btn triple" th:if="${dipGen == true}">
             <form method="post" name="passform" action="passphrase">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               <a href="javascript:passform.submit()" role="button">Generate and Store a JSON Web Token</a>
+            </form>
+          </li>
+          <li class="triple" th:if="${dipGen != true}">
+            <div class="content"> The Token Was Generated At
+              <div class="time" th:text="${date}"></div>
+            </div>
+          </li>
+          <li class="btn triple" th:if="${dipGen != true}">
+            <form method="post" name="passform2" action="passphrase">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <a href="javascript:passform2.submit()" role="button">Invalidate and <br> Re-Generate <br> a JSON Web Token</a>
             </form>
           </li>
         </ul>
@@ -46,7 +57,7 @@
           <li class="btn triple">
             <form method="post" name="form1" action="logout">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-              <a href="javascript:form1.submit()" role="button" onclick="return confirm('Invalidate your all tokens?');">Invalidate All Tokens</a>
+              <a href="javascript:form1.submit()" role="button" onclick="return confirm('logout?');">IdP Logout</a>
             </form>
           </li>
         </ul>

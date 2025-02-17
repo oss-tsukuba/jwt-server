@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IssueRepository extends JpaRepository<Issue, Integer>, JpaSpecificationExecutor<Error> {
 
-    public Page<Issue> findByUserOrderByIdDesc(Pageable pageable, String user);
+    public Page<Issue> findByUserOrderByDateDesc(Pageable pageable, String user);
+
+    public Issue findTopByUserAndIpAddrAndTypeOrderByDateDesc(String user, String ipAddr, int type);
 
 }

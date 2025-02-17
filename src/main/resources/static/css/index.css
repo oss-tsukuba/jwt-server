@@ -54,7 +54,14 @@
   line-height:30px;
 }
 
+div.content {
+  font-size: 1.1em;
+}
 
+div.content div.time {
+  font-size: 1.3em;
+  text-decoration: underline;
+}
 
 p.sample {
   line-height:20px;
@@ -70,7 +77,7 @@ p.sample {
 }
 
 div.version {
-	text-align: center;
-	font-size: x-large;
+  text-align: center;
+  font-size: x-large;
 }
 

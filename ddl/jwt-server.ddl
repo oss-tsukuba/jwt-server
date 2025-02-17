@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS `errors` (
   KEY `id` (`id`)
 );
 
-
 --
 -- Table structure for table `tokens`
 --
@@ -25,6 +24,17 @@ CREATE TABLE IF NOT EXISTS `tokens` (
   `refresh_token` text,
   `iv` varchar(128) NOT NULL,
   PRIMARY KEY (`user`,`audience`)
+);
+
+--
+-- Table structure for table `token_time`
+--
+
+CREATE TABLE IF NOT EXISTS `token_time` (
+  `user` varchar(20) NOT NULL,
+  `login_at` bigint DEFAULT 0,
+  `logout_at` bigint DEFAULT 0,
+  PRIMARY KEY (`user`)
 );
 
 --

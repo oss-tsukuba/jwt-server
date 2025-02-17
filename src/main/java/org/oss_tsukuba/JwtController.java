@@ -23,6 +23,7 @@ import org.oss_tsukuba.dao.TokenRepository;
 import org.oss_tsukuba.service.TokenService;
 import org.oss_tsukuba.utils.CryptUtil;
 import org.oss_tsukuba.utils.Damm;
+import org.oss_tsukuba.utils.IssueUtil;
 import org.oss_tsukuba.utils.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -287,7 +288,7 @@ public class JwtController {
         }
 
         Issue issue = new Issue(user, ipAddr, hostname, Issue.CHANGE_PASSPHRASE);
-        issueRepository.save(issue);
+        IssueUtil.udpateIssue(issueRepository, issue);
 
         return newPassphrase;
     }
@@ -372,7 +373,7 @@ public class JwtController {
         }
 
         Issue issue = new Issue(user, ipAddr, hostname, Issue.TOKEN);
-        issueRepository.save(issue);
+        IssueUtil.udpateIssue(issueRepository, issue);
 
         return accessToken;
     }

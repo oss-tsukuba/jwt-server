@@ -15,6 +15,8 @@ import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
 import org.oss_tsukuba.dao.Token;
 import org.oss_tsukuba.dao.TokenRepository;
+import org.oss_tsukuba.dao.TokenTime;
+import org.oss_tsukuba.dao.TokenTimeRepository;
 import org.oss_tsukuba.oauth2.EnhancedOAuth2AuthenticationToken;
 import org.oss_tsukuba.utils.CryptUtil;
 import org.oss_tsukuba.utils.Damm;
@@ -28,11 +30,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
@@ -49,7 +46,10 @@ public class TokenServiceImpl implements TokenService {
     private TokenRepository tokenRepository;
 
     @Autowired
-    ErrorRepository errorRepository;
+    private ErrorRepository errorRepository;
+
+    @Autowired
+    private TokenTimeRepository tokenTimeRepository;
 
     @Value("${spring.security.oauth2.client.provider.keycloak.issuer-uri}")
     private String baseUrl;
@@ -167,6 +167,11 @@ public class TokenServiceImpl implements TokenService {
                                 Base64.getEncoder().encodeToString(enc2), Base64.getEncoder().encodeToString(iv)));
 
                         LogUtils.info(String.format("User:%s changed passphrase from Web Browser", user));
+
+                        // save login time
+                        long loginAt = oauth2token.getAccessToken().getIssuedAt().getEpochSecond();
+                        tokenTimeRepository.save(new TokenTime(user, loginAt, 0));
+
                     } catch (Exception e) {
                         LogUtils.error(e.toString(), e);
                     }

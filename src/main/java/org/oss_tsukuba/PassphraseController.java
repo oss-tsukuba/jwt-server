@@ -3,13 +3,20 @@ package org.oss_tsukuba;
 import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import org.oss_tsukuba.dao.Error;
 import org.oss_tsukuba.dao.ErrorRepository;
 import org.oss_tsukuba.dao.Issue;
 import org.oss_tsukuba.dao.IssueRepository;
+import org.oss_tsukuba.dao.TokenTime;
+import org.oss_tsukuba.dao.TokenTimeRepository;
 import org.oss_tsukuba.service.TokenService;
+import org.oss_tsukuba.utils.IssueUtil;
 import org.oss_tsukuba.utils.KeycloakUtil;
 import org.oss_tsukuba.utils.PropUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +43,9 @@ public class PassphraseController {
     @Autowired
     private IssueRepository issueRepository;
 
+    @Autowired
+    private TokenTimeRepository tokenTimeRepository;
+
     @Value("${user-claim:}")
     private String userClaim;
 
@@ -59,9 +69,27 @@ public class PassphraseController {
     }
 
     @GetMapping(path = "/menu")
-    public String getMenu(Model model) {
+    public String getMenu(Principal principal, Model model) {
+        String user = KeycloakUtil.getUserName(principal, userClaim);
 
         model.addAttribute("version", version);
+
+        Optional<TokenTime> opt = tokenTimeRepository.findById(user);
+        TokenTime tokenTime = null;
+
+        if (opt.isPresent()) {
+            tokenTime = opt.get();
+        }
+
+        if (tokenTime == null ||
+                tokenTime.getLogoutAt() != 0) {
+            model.addAttribute("dipGen", true);
+        } else {
+            model.addAttribute("dipGen", false);
+            Instant instant = Instant.ofEpochSecond(tokenTime.getLoginAt());
+            Date date = Date.from(instant);
+            model.addAttribute("date", formatter.format(date));
+        }
 
         return "menu";
     }
@@ -105,7 +133,7 @@ public class PassphraseController {
             model.addAttribute("otherUrl", otherUrl);
         }
 
-        issueRepository.save(issue);
+        IssueUtil.udpateIssue(issueRepository, issue);
 
         return "passphrase";
     }
@@ -125,7 +153,7 @@ public class PassphraseController {
     @GetMapping(path = "/issues")
     public String getIssues(Principal principal, Model model, Pageable pageable) {
         String user = KeycloakUtil.getUserName(principal, userClaim);
-        Page<Issue> issues = issueRepository.findByUserOrderByIdDesc(pageable, user);
+        Page<Issue> issues = issueRepository.findByUserOrderByDateDesc(pageable, user);
         model.addAttribute("page", issues);
         model.addAttribute("issues", issues.getContent());
         model.addAttribute("url", "issues");

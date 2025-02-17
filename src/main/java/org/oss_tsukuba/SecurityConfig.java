@@ -1,7 +1,9 @@
 package org.oss_tsukuba;
 
+import org.oss_tsukuba.dao.TokenTimeRepository;
 import org.oss_tsukuba.oauth2.Oauth2ResultConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -21,8 +23,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig  {
 
+    @Value("${user-claim:}")
+    private String userClaim;
+
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
+
+    @Autowired
+    private TokenTimeRepository tokenTimeRepository;
 
     @Bean
     public SecurityFilterChain web(HttpSecurity http) throws Exception {
@@ -54,7 +62,8 @@ public class SecurityConfig  {
     }
 
     private OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler() {
-        OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
+        JwtServerLogoutHandler oidcLogoutSuccessHandler = new JwtServerLogoutHandler(clientRegistrationRepository,
+                tokenTimeRepository, userClaim);
         oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}");
         return oidcLogoutSuccessHandler;
     }
