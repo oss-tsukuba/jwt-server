@@ -14,7 +14,7 @@ Rocky Linux 9を前提とする。
 # dnf -y update
 ```
 
-## jwt-serverソースコードの取得
+## JWT Serverソースコードの取得
 
 ### gitパッケージのインストール
 
@@ -72,7 +72,7 @@ default-character-set = utf8mb4
 
 ### ユーザ＆データベースの作成
 
-jwt-serverからアクセスするためのユーザを作成する。仮に、ユーザ名をjwtserver、パスワードをDBPASSWORD、データベース名をjwtserverdbとする。
+JWT Serverからアクセスするためのユーザを作成する。仮に、ユーザ名をjwtserver、パスワードをDBPASSWORD、データベース名をjwtserverdbとする。
 ```
 $ mysql -u root
 MariaDB [(none)]> CREATE USER 'jwtserver'@'localhost' IDENTIFIED BY 'DBPASSWORD';
@@ -188,7 +188,7 @@ WantedBy=multi-user.target
 # systemctl start tomcat
 ```
 
-## jwt-server のインストールと設定
+## JWT Serverのインストールと設定
 
 ### Maven のインストール
 
@@ -196,7 +196,7 @@ WantedBy=multi-user.target
 # dnf -y install maven
 ```
 
-### jwt-serverの設定
+### JWT Serverの設定
 
 ```
 % vi jwt-server/src/main/resources/application.properties
@@ -239,7 +239,7 @@ spring.main.allow-circular-references=true
 
   - spring.security.oauth2.client.registration.keycloak.client-id
 
-    jwt-serverのクライアントIDを設定する。
+    JWT ServerのクライアントIDを設定する。
 
   - spring.security.oauth2.client.registration.keycloak.client-secret
 
@@ -285,14 +285,14 @@ spring.main.allow-circular-references=true
 
     データベースのスキーマの生成方法を設定する。変更不要です。
 
-### jwt-serverのビルド
+### JWT Serverのビルド
 
 ```
 $ cd jwt-server
 $ mvn package
 ```
 
-### jwt-serverのデプロイ
+### JWT Serverのデプロイ
 
 ```
 $ sudo cp target/jwt-server.war /usr/share/tomcat/webapps/ROOT.war
@@ -323,5 +323,32 @@ SELinuxの設定を変更し、tomcatへのネットワーク接続を許可す�
 
 ```
 # systemctl enable httpd
+# systemctl start httpd
+```
+
+# JWT Serverの更新
+
+JWT Serverのバージョンによってはデータベース・スキーマの変更手順が必要な可能性がありますので、リリースノートを必ず確認してください。
+
+データベース・スキーマの変更が必要な場合は更新されたDDLをMySQL上で実行しデータベースを更新します。データベース・スキーマの変更がない場合、この手順は不要なので次の手順に進んでください。
+
+```
+$ mysql -u jwtserver -p jwtserverdb < jwt-server/ddl/jwt-server.ddl
+Enter password: DBPASSWORD …データベース・ユーザーのパスワード
+```
+
+「JWT Serverのビルド」の手順に従ってビルドし、正常にビルドできることを確認します。
+
+apache httpd、tomcat の順で停止します。
+```
+# systemctl stop httpd
+# systemctl stop tomcat
+```
+
+「JWT Serverのデプロイ」の手順に従い、デプロイを実施します。
+
+tomcat、apache httpd の順で起動します。
+```
+# systemctl start tomcat
 # systemctl start httpd
 ```
