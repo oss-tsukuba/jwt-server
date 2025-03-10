@@ -1,3 +1,12 @@
+Release note for JWT server 1.2.0
+=================================
+
+[2025.3.10]
+
+### Updated feature
+* display date of issue when logged in if alreadh issued
+* change "Date of Issue" in the advanced menu to show only the most recent log
+
 Release note for JWT server 1.1.0
 =================================
 
