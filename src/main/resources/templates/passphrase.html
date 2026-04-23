@@ -85,6 +85,10 @@
        <div th:if="${error == 1 || error == 2}", class="h3">
       Please contact your administrator
        </div>
+       <div th:if="${error == 3}", class="h3">
+       Possibly Anauthozied <br>
+       Try Logging Out using "IdP Logout"
+       </div>
         <br>
         <br>
 

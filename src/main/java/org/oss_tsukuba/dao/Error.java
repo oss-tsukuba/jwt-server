@@ -35,6 +35,8 @@ public class Error {
 
     public static final int UNEXPECTED_ERROR = 6;
 
+    public static final int UNAUTHORIZED = 7;
+
     @Id
     @Column(name = "id")
     private int id;
@@ -86,6 +88,8 @@ public class Error {
             return "server down";
         case UNEXPECTED_ERROR:
             return "unexpected error";
+        case UNAUTHORIZED:
+            return "unauthorized error";
         }
 
         return "others";

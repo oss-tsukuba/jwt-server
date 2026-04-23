@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -177,10 +178,18 @@ public class TokenServiceImpl implements TokenService {
                     }
                 }
             } catch (RestClientException e) {
-                model.addAttribute("error", 1);
-                Error error = new Error(user, "", "jwt-server", SERVER_DOWN);
-                errorRepository.save(error);
+                Error error = null;
 
+                if (e instanceof HttpClientErrorException &&
+                        ((HttpClientErrorException) e).getStatusCode()== HttpStatus.BAD_REQUEST) {
+                    model.addAttribute("error", 3);
+                    error = new Error(user, "", "jwt-server", UNAUTHORIZED);
+                } else {
+                    model.addAttribute("error", 1);
+                    error = new Error(user, "", "jwt-server", SERVER_DOWN);
+                }
+
+                errorRepository.save(error);
                 LogUtils.info(String.format("User error occured(%s, %s, %s)", error.getUser(), error.getError(),
                         error.getIpAddr()));
             }
