@@ -14,12 +14,12 @@
 
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
     <main role="main" class="inner cover">
-        <h1 class="cover-heading">Access Informaton</h1>
+        <h1 class="cover-heading">Access Information</h1>
 
         <br>
      <br>
      <span th:if="${error == 0}">
-       <span class="h3">A JSON Web Token is succesfully stored</span>
+       <span class="h3">A JSON Web Token is successfully stored</span>
        <br>
        <br>
        <div class="box">
@@ -86,7 +86,7 @@
       Please contact your administrator
        </div>
        <div th:if="${error == 3}", class="h3">
-       Possibly Anauthozied <br>
+       Possibly Unauthozied <br>
        Try Logging Out using "IdP Logout"
        </div>
         <br>
