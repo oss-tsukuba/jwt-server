@@ -352,3 +352,14 @@ tomcat、apache httpd の順で起動します。
 # systemctl start tomcat
 # systemctl start httpd
 ```
+
+# ユーザ毎にScopeを変更する場合
+
+ユーザ毎にScopeを変更する場合は [keycloak.md](keycloak.md) を参照しユーザ毎にScopeを変更する設定を行ってください。さらにJWT Serverでは、下記のプロパティを設定してください。
+
+``` properties
+spring.security.oauth2.client.registration.keycloak.scope=openid,scope-1,scope-2
+```
+
+scope-1 および scope-2 はユーザ毎に変更させたいScopeです。すべてのScopeをここに記述してください。
+
