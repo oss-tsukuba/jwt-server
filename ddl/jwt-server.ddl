@@ -18,11 +18,11 @@ CREATE TABLE IF NOT EXISTS `errors` (
 --
 
 CREATE TABLE IF NOT EXISTS `tokens` (
-  `user` varchar(20) NOT NULL,
-  `audience` varchar(20) NOT NULL,
+  `user` varchar(255) NOT NULL,
+  `audience` varchar(255) NOT NULL,
   `access_token` text,
   `refresh_token` text,
-  `iv` varchar(128) NOT NULL,
+  `iv` varchar(255) NOT NULL,
   PRIMARY KEY (`user`,`audience`)
 );
 
