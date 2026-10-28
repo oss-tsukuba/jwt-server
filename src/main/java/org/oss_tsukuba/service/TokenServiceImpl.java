@@ -20,7 +20,7 @@ import org.oss_tsukuba.dao.TokenTimeRepository;
 import org.oss_tsukuba.oauth2.EnhancedOAuth2AuthenticationToken;
 import org.oss_tsukuba.utils.CryptUtil;
 import org.oss_tsukuba.utils.Damm;
-import org.oss_tsukuba.utils.KeycloakUtil;
+import org.oss_tsukuba.utils.OidcUtil;
 import org.oss_tsukuba.utils.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +30,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
@@ -52,13 +55,13 @@ public class TokenServiceImpl implements TokenService {
     @Autowired
     private TokenTimeRepository tokenTimeRepository;
 
-    @Value("${spring.security.oauth2.client.provider.keycloak.issuer-uri}")
-    private String baseUrl;
+    @Autowired
+    private ClientRegistrationRepository clientRegistrationRepository;
 
-    @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
+    @Value("${spring.security.oauth2.client.registration.oidc.client-id}")
     private String clientId;
 
-    @Value("${spring.security.oauth2.client.registration.keycloak.client-secret}")
+    @Value("${spring.security.oauth2.client.registration.oidc.client-secret}")
     private String secret;
 
     @Value("${user-claim:}")
@@ -102,11 +105,14 @@ public class TokenServiceImpl implements TokenService {
         if (principal instanceof EnhancedOAuth2AuthenticationToken) {
             EnhancedOAuth2AuthenticationToken oauth2token = (EnhancedOAuth2AuthenticationToken) principal;
 
-            String user = KeycloakUtil.getUserName(principal, userClaim);
+            String user = OidcUtil.getUserName(principal, userClaim);
             String rToken = oauth2token.getRefreshToken().getTokenValue();
 
-            String url = baseUrl + "/protocol/openid-connect/token";
+            ClientRegistration registration =
+                    clientRegistrationRepository.findByRegistrationId("oidc");
 
+            String url = registration.getProviderDetails().getTokenUri();
+            
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
             MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
@@ -143,6 +149,12 @@ public class TokenServiceImpl implements TokenService {
                         JSONObject js = (JSONObject) new JSONParser().parse(jwt);
                         accessToken = (String) js.get("access_token");
                         refreshToken = (String) js.get("refresh_token");
+                        
+                        if (refreshToken != null) {
+                            oauth2token.setRefreshToken(
+                                new OAuth2RefreshToken(refreshToken, Instant.now())
+                            );
+                        }
                     } catch (ParseException e) {
                         LogUtils.error(e.toString(), e);
                     }
@@ -200,8 +212,11 @@ public class TokenServiceImpl implements TokenService {
     public String getToken(String user, String pass) {
         String jwt = null;
 
-        String url = baseUrl + "/protocol/openid-connect/token";
+        ClientRegistration registration =
+                clientRegistrationRepository.findByRegistrationId("oidc");
 
+        String url = registration.getProviderDetails().getTokenUri();
+        
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();

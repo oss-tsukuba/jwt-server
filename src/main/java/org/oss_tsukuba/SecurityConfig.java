@@ -1,5 +1,8 @@
 package org.oss_tsukuba;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.oss_tsukuba.dao.TokenTimeRepository;
 import org.oss_tsukuba.oauth2.Oauth2ResultConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.security.oauth2.client.oidc.authentication.OidcIdToke
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory;
@@ -32,6 +36,12 @@ public class SecurityConfig  {
     @Autowired
     private TokenTimeRepository tokenTimeRepository;
 
+    @Value("${oidc.id-token-signing-algorithm:ES256}")
+    private String idTokenSigningAlgorithm;
+    
+    @Value("${oidc.end-session-uri:}")
+    private String endSessionUri;
+    
     @Bean
     public SecurityFilterChain web(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(
@@ -62,17 +72,44 @@ public class SecurityConfig  {
     }
 
     private OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler() {
-        JwtServerLogoutHandler oidcLogoutSuccessHandler = new JwtServerLogoutHandler(clientRegistrationRepository,
-                tokenTimeRepository, userClaim);
-        oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}");
-        return oidcLogoutSuccessHandler;
+
+        ClientRegistrationRepository repository = clientRegistrationRepository;
+
+        if (!endSessionUri.isBlank()) {
+
+            ClientRegistration registration =
+                    clientRegistrationRepository.findByRegistrationId("oidc");
+
+            Map<String, Object> metadata = new HashMap<>(
+                    registration.getProviderDetails().getConfigurationMetadata());
+
+            // Discovery Document で取得できていない場合だけ補完
+            metadata.putIfAbsent("end_session_endpoint", endSessionUri);
+
+            ClientRegistration updated =
+                    ClientRegistration.withClientRegistration(registration)
+                            .providerConfigurationMetadata(metadata)
+                            .build();
+
+            repository = new InMemoryClientRegistrationRepository(updated);
+        }
+
+        JwtServerLogoutHandler handler =
+                new JwtServerLogoutHandler(repository, tokenTimeRepository, userClaim);
+
+        handler.setPostLogoutRedirectUri("{baseUrl}");
+
+        return handler;
     }
 
     @Bean
     public JwtDecoderFactory<ClientRegistration> idTokenDecoderFactory() {
-        OidcIdTokenDecoderFactory idTokenDecoderFactory = new OidcIdTokenDecoderFactory();
-        idTokenDecoderFactory.setJwsAlgorithmResolver(clientRegistration -> SignatureAlgorithm.ES256);
+        OidcIdTokenDecoderFactory factory =
+                new OidcIdTokenDecoderFactory();
 
-        return idTokenDecoderFactory;
+        factory.setJwsAlgorithmResolver(
+                registration -> SignatureAlgorithm.from(idTokenSigningAlgorithm));
+
+        return factory;
     }
 }

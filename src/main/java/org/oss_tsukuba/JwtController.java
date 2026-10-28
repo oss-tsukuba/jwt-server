@@ -33,6 +33,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,13 +66,13 @@ public class JwtController {
     @Autowired
     private TokenService tokenService;
 
-    @Value("${spring.security.oauth2.client.provider.keycloak.issuer-uri}")
-    private String baseUrl;
+    @Autowired
+    private ClientRegistrationRepository clientRegistrationRepository;
 
-    @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
+    @Value("${spring.security.oauth2.client.registration.oidc.client-id}")
     private String clientId;
 
-    @Value("${spring.security.oauth2.client.registration.keycloak.client-secret}")
+    @Value("${spring.security.oauth2.client.registration.oidc.client-secret}")
     private String secret;
 
     @Value("${jwt-server.passphrase:}")
@@ -120,8 +122,11 @@ public class JwtController {
     private String getJwt(String refreshToken) {
         String jwt = null;
 
-        String url = baseUrl + "/protocol/openid-connect/token";
+        ClientRegistration registration =
+                clientRegistrationRepository.findByRegistrationId("oidc");
 
+        String url = registration.getProviderDetails().getTokenUri();
+        
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();

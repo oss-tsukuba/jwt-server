@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.oss_tsukuba.dao.TokenTime;
 import org.oss_tsukuba.dao.TokenTimeRepository;
-import org.oss_tsukuba.utils.KeycloakUtil;
+import org.oss_tsukuba.utils.OidcUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -31,7 +31,7 @@ public class JwtServerLogoutHandler extends OidcClientInitiatedLogoutSuccessHand
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
 
-        String user = KeycloakUtil.getUserName(authentication, userClaim);
+        String user = OidcUtil.getUserName(authentication, userClaim);
 
         super.onLogoutSuccess(request, response, authentication);
 

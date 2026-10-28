@@ -30,4 +30,8 @@ public class EnhancedOAuth2AuthenticationToken extends OAuth2AuthenticationToken
     public OAuth2RefreshToken getRefreshToken() {
         return refreshToken;
     }
+
+    public void setRefreshToken(OAuth2RefreshToken refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 }

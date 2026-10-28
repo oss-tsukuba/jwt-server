@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class KeycloakUtil {
+public class OidcUtil {
 
 
     private static Decoder decoder = Base64.getUrlDecoder();

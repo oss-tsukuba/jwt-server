@@ -17,7 +17,7 @@ import org.oss_tsukuba.dao.TokenTime;
 import org.oss_tsukuba.dao.TokenTimeRepository;
 import org.oss_tsukuba.service.TokenService;
 import org.oss_tsukuba.utils.IssueUtil;
-import org.oss_tsukuba.utils.KeycloakUtil;
+import org.oss_tsukuba.utils.OidcUtil;
 import org.oss_tsukuba.utils.PropUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,7 +70,7 @@ public class PassphraseController {
 
     @GetMapping(path = "/menu")
     public String getMenu(Principal principal, Model model) {
-        String user = KeycloakUtil.getUserName(principal, userClaim);
+        String user = OidcUtil.getUserName(principal, userClaim);
 
         model.addAttribute("version", version);
 
@@ -110,7 +110,7 @@ public class PassphraseController {
             hostname = "";
         }
 
-        String user = KeycloakUtil.getUserName(principal, userClaim);
+        String user = OidcUtil.getUserName(principal, userClaim);
         Issue issue = new Issue(user, ipAddr, hostname, Issue.PASSPHRASE);
         model.addAttribute("date", formatter.format(issue.getDate()));
         model.addAttribute("offset", OffsetDateTime.now().getOffset());
@@ -140,7 +140,7 @@ public class PassphraseController {
 
     @GetMapping(path = "/errors")
     public String getErrros(Principal principal, Model model, Pageable pageable) {
-        String user = KeycloakUtil.getUserName(principal, userClaim);
+        String user = OidcUtil.getUserName(principal, userClaim);
         Page<Error> errors = errorRepository.findByUserOrderByIdDesc(pageable, user);
         model.addAttribute("page", errors);
         model.addAttribute("errors", errors.getContent());
@@ -152,7 +152,7 @@ public class PassphraseController {
 
     @GetMapping(path = "/issues")
     public String getIssues(Principal principal, Model model, Pageable pageable) {
-        String user = KeycloakUtil.getUserName(principal, userClaim);
+        String user = OidcUtil.getUserName(principal, userClaim);
         Page<Issue> issues = issueRepository.findByUserOrderByDateDesc(pageable, user);
         model.addAttribute("page", issues);
         model.addAttribute("issues", issues.getContent());
