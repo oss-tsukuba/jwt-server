@@ -1,7 +1,10 @@
 package org.oss_tsukuba;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.text.ParseException;
+
+import com.nimbusds.jwt.SignedJWT;
 
 import org.oss_tsukuba.dao.TokenTimeRepository;
 import org.oss_tsukuba.oauth2.Oauth2ResultConverter;
@@ -16,10 +19,10 @@ import org.springframework.security.oauth2.client.oidc.authentication.OidcIdToke
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory;
+import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -36,11 +39,7 @@ public class SecurityConfig  {
     @Autowired
     private TokenTimeRepository tokenTimeRepository;
 
-    @Value("${oidc.id-token-signing-algorithm:ES256}")
-    private String idTokenSigningAlgorithm;
     
-    @Value("${oidc.end-session-uri:}")
-    private String endSessionUri;
     
     @Bean
     public SecurityFilterChain web(HttpSecurity http) throws Exception {
@@ -73,29 +72,8 @@ public class SecurityConfig  {
 
     private OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler() {
 
-        ClientRegistrationRepository repository = clientRegistrationRepository;
-
-        if (!endSessionUri.isBlank()) {
-
-            ClientRegistration registration =
-                    clientRegistrationRepository.findByRegistrationId("oidc");
-
-            Map<String, Object> metadata = new HashMap<>(
-                    registration.getProviderDetails().getConfigurationMetadata());
-
-            // Discovery Document で取得できていない場合だけ補完
-            metadata.putIfAbsent("end_session_endpoint", endSessionUri);
-
-            ClientRegistration updated =
-                    ClientRegistration.withClientRegistration(registration)
-                            .providerConfigurationMetadata(metadata)
-                            .build();
-
-            repository = new InMemoryClientRegistrationRepository(updated);
-        }
-
         JwtServerLogoutHandler handler =
-                new JwtServerLogoutHandler(repository, tokenTimeRepository, userClaim);
+                new JwtServerLogoutHandler(clientRegistrationRepository, tokenTimeRepository, userClaim);
 
         handler.setPostLogoutRedirectUri("{baseUrl}");
 
@@ -104,12 +82,26 @@ public class SecurityConfig  {
 
     @Bean
     public JwtDecoderFactory<ClientRegistration> idTokenDecoderFactory() {
-        OidcIdTokenDecoderFactory factory =
-                new OidcIdTokenDecoderFactory();
+        Map<SignatureAlgorithm, OidcIdTokenDecoderFactory> factories = new ConcurrentHashMap<>();
+        return registration -> token -> {
+            SignatureAlgorithm algorithm;
+            try {
+                algorithm = SignatureAlgorithm.from(
+                        SignedJWT.parse(token).getHeader().getAlgorithm().getName());
+            } catch (ParseException e) {
+                throw new BadJwtException("Invalid ID Token", e);
+            }
+            if (algorithm == null) {
+                throw new BadJwtException("Unsupported ID Token signing algorithm");
+            }
 
-        factory.setJwsAlgorithmResolver(
-                registration -> SignatureAlgorithm.from(idTokenSigningAlgorithm));
-
-        return factory;
+            // Keep Spring's OIDC validators and cache decoders separately for each algorithm.
+            OidcIdTokenDecoderFactory factory = factories.computeIfAbsent(algorithm, key -> {
+                OidcIdTokenDecoderFactory decoderFactory = new OidcIdTokenDecoderFactory();
+                decoderFactory.setJwsAlgorithmResolver(client -> key);
+                return decoderFactory;
+            });
+            return factory.createDecoder(registration).decode(token);
+        };
     }
 }
