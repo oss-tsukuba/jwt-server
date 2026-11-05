@@ -4,7 +4,7 @@
 
 CREATE TABLE IF NOT EXISTS `errors` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `user` varchar(20) NOT NULL,
+  `user` varchar(255) NOT NULL,
   `date` timestamp NULL,
   `type` int DEFAULT '0',
   `ip_addr` varchar(256) DEFAULT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `tokens` (
 --
 
 CREATE TABLE IF NOT EXISTS `token_time` (
-  `user` varchar(20) NOT NULL,
+  `user` varchar(255) NOT NULL,
   `login_at` bigint DEFAULT 0,
   `logout_at` bigint DEFAULT 0,
   PRIMARY KEY (`user`)
