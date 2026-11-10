@@ -1,6 +1,6 @@
 # JWT server
 
-JWT server is a web application that stores refresh tokens of OAuth2 securely, and provides the access token using [jwt-agent](https://github.com/oss-tsukuba/jwt-agent.git) and [jwt-logon](https://github.com/oss-tsukuba/jwt-logon.git).  Tht JWT server assumes to use Keycloak as an identity provider.
+JWT server is a web application that stores refresh tokens of OAuth2 securely, and provides the access token using [jwt-agent](https://github.com/oss-tsukuba/jwt-agent.git) and [jwt-logon](https://github.com/oss-tsukuba/jwt-logon.git). The JWT server assumes the use of Keycloak as an OpenID Connect (OIDC) identity provider.
 
 When you log in the JWT server, access information will be provided, which includes a user name and passphrase to retrieve an access token by `jwt-agent` or `jwt-logon`.
 
@@ -23,19 +23,29 @@ JWT servers can be redundant using DBMS multi-source replication.  When `jwt-age
 
 Change `src/main/resources/application.properties` for your environment.
 
-### Keycloak settings
+### Keycloak settings (OIDC)
 
-Specify the realm and the confidential client on Keycloak.
-Change below for the Keycloak.
+Specify the realm and confidential client on Keycloak. Use `oidc` as both the registration ID and provider ID because the application looks up this registration by name.
 
+Configuration example:
+
+```properties
+spring.security.oauth2.client.registration.oidc.client-id=${CLIENT}
+spring.security.oauth2.client.registration.oidc.client-secret=${SECRET}
+spring.security.oauth2.client.registration.oidc.provider=oidc
+spring.security.oauth2.client.registration.oidc.scope=openid
+spring.security.oauth2.client.registration.oidc.authorization-grant-type=authorization_code
+spring.security.oauth2.client.provider.oidc.issuer-uri=https://${KEYCLOAK}:443/auth/realms/${REALM}
 ```
-spring.security.oauth2.client.registration.keycloak.client-id=${CLIENT}
-spring.security.oauth2.client.registration.keycloak.client-secret=${CONFIDENTIAL}
-spring.security.oauth2.client.provider.keycloak.issuer-uri=https://${KEYCLOAK}:8443/auth/realms/${REALM}
-```
-- spring.security.oauth2.client.registration.keycloak.client-id: Client name
-- spring.security.oauth2.client.registration.keycloak.client-secret: Confidential code for the client
-- spring.security.oauth2.client.provider.keycloak.issuer-uri: Keycloak's authentication url
+
+- `client-id`: Client ID registered with Keycloak
+- `client-secret`: Secret for the client
+- `provider`: `oidc`
+- `scope`: Comma-separated scopes, including `openid`. Add any scopes required by your Keycloak configuration or application.
+- `authorization-grant-type`: `authorization_code`
+- `issuer-uri`: Keycloak's issuer URI, including the realm. Use the path for your deployment (which may omit `/auth`). The application obtains endpoint URLs, including the token endpoint, through OIDC discovery.
+
+When upgrading, rename `spring.security.oauth2.client.registration.keycloak.*` to `spring.security.oauth2.client.registration.oidc.*` and `spring.security.oauth2.client.provider.keycloak.*` to `spring.security.oauth2.client.provider.oidc.*`, and change the registration's `provider` value from `keycloak` to `oidc`.
 
 ### OAuth2 token setting
 

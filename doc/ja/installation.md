@@ -1,7 +1,7 @@
 # JWT Server インストール手順
 
 コマンドプロンプトが「#」の場合はroot権限、「$」の場合は一般ユーザ権限での実行を意味する。
-また、IdPサーバとしてKeycloakの利用を前提とする。
+また、IdPサーバとしてKeycloakの利用を前提とする。Keycloak側の設定は [keycloak.md](keycloak.md) を参照する。
 
 ## OS
 
@@ -202,15 +202,15 @@ WantedBy=multi-user.target
 % vi jwt-server/src/main/resources/application.properties
 ```
 
-（設定例)
-```
-# Keycloak settings
-spring.security.oauth2.client.registration.keycloak.client-id=CLIENT_ID … クライアントIDを記載
-spring.security.oauth2.client.registration.keycloak.client-secret=KEYCLOAK_SECRET … シークレットを記載
-spring.security.oauth2.client.registration.keycloak.provider=keycloak
-spring.security.oauth2.client.registration.keycloak.scope=openid
-spring.security.oauth2.client.registration.keycloak.authorization-grant-type=authorization_code
-spring.security.oauth2.client.provider.keycloak.issuer-uri=https://keycloak.example.org:443/auth/realms/REALM … REALMを含めたKeycloakサーバーのURLを記載
+Keycloakを利用する場合の設定例を示す。各値は利用環境に合わせて置き換える。
+```properties
+# OIDC settings (Keycloak example)
+spring.security.oauth2.client.registration.oidc.client-id=CLIENT_ID
+spring.security.oauth2.client.registration.oidc.client-secret=CLIENT_SECRET
+spring.security.oauth2.client.registration.oidc.provider=oidc
+spring.security.oauth2.client.registration.oidc.scope=openid
+spring.security.oauth2.client.registration.oidc.authorization-grant-type=authorization_code
+spring.security.oauth2.client.provider.oidc.issuer-uri=https://keycloak.example.org:443/auth/realms/REALM
 
 
 # OAuth2 claim for user name
@@ -235,17 +235,31 @@ spring.jpa.hibernate.ddl-auto=update
 spring.main.allow-circular-references=true
 ```
 
+OIDC対応前の設定から移行する場合は、`spring.security.oauth2.client.registration.keycloak.*` を `spring.security.oauth2.client.registration.oidc.*` に、`spring.security.oauth2.client.provider.keycloak.*` を `spring.security.oauth2.client.provider.oidc.*` に変更する。また、登録設定の `provider` の値を `keycloak` から `oidc` に変更する。Keycloakを利用する場合も、実装が参照する登録IDとプロバイダIDは `oidc` とする。
+
 各設定値の内容は以下の通りである。
 
-  - spring.security.oauth2.client.registration.keycloak.client-id
+  - spring.security.oauth2.client.registration.oidc.client-id
 
     JWT ServerのクライアントIDを設定する。
 
-  - spring.security.oauth2.client.registration.keycloak.client-secret
+  - spring.security.oauth2.client.registration.oidc.client-secret
 
     クライアントのシークレットを設定する。
 
- - spring.security.oauth2.client.provider.keycloak.issuer-uri
+  - spring.security.oauth2.client.registration.oidc.provider
+
+    `oidc` を設定する。
+
+  - spring.security.oauth2.client.registration.oidc.scope
+
+    要求するScopeをカンマ区切りで設定する。`openid` を必ず含め、Keycloakやアプリケーションの設定に応じて必要なScopeを追加する。
+
+  - spring.security.oauth2.client.registration.oidc.authorization-grant-type
+
+    `authorization_code` を設定する。
+
+  - spring.security.oauth2.client.provider.oidc.issuer-uri
 
     レルムを含めたKeycloakサーバのURLを設定する。
 
@@ -358,7 +372,7 @@ tomcat、apache httpd の順で起動します。
 ユーザ毎にScopeを変更する場合は [keycloak.md](keycloak.md) を参照しユーザ毎にScopeを変更する設定を行ってください。さらにJWT Serverでは、下記のプロパティを設定してください。
 
 ``` properties
-spring.security.oauth2.client.registration.keycloak.scope=openid,scope-1,scope-2
+spring.security.oauth2.client.registration.oidc.scope=openid,scope-1,scope-2
 ```
 
 scope-1 および scope-2 はユーザ毎に変更させたいScopeです。すべてのScopeをここに記述してください。
