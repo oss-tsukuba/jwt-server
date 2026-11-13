@@ -154,6 +154,8 @@ public class TokenServiceImpl implements TokenService {
                             oauth2token.setRefreshToken(
                                 new OAuth2RefreshToken(refreshToken, Instant.now())
                             );
+                        } else {
+                            refreshToken = rToken;
                         }
                     } catch (ParseException e) {
                         LogUtils.error(e.toString(), e);

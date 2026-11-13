@@ -338,7 +338,10 @@ public class JwtController {
                 try {
                     JSONObject js = (JSONObject) new JSONParser().parse(jwt);
                     accessToken = (String) js.get("access_token");
-                    refreshToken = (String) js.get("refresh_token");
+                    String newRefreshToken = (String) js.get("refresh_token");
+                    if (newRefreshToken != null) {
+                        refreshToken = newRefreshToken;
+                    }
                 } catch (ParseException e) {
                     LogUtils.error(e.toString(), e);
                 }
