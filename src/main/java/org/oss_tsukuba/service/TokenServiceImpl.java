@@ -3,6 +3,7 @@ package org.oss_tsukuba.service;
 import static org.oss_tsukuba.dao.Error.*;
 
 import java.security.Principal;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Base64;
@@ -80,22 +81,37 @@ public class TokenServiceImpl implements TokenService {
         String date = "";
 
         if (jwts.length == 3) {
-            String json = new String(Base64.getDecoder().decode(jwts[1]));
-
             try {
+                String json = new String(Base64.getUrlDecoder().decode(jwts[1]), StandardCharsets.UTF_8);
                 JSONObject jsonObj = (JSONObject) new JSONParser().parse(json);
 
-                Long exp = (Long) jsonObj.get(EXP_CLAIM);
-                Instant instant = Instant.ofEpochSecond(exp);
+                Number exp = (Number) jsonObj.get(EXP_CLAIM);
+                if (exp == null) {
+                    return date;
+                }
+                Instant instant = Instant.ofEpochSecond(exp.longValue());
 
                 return df.format(Date.from(instant));
-            } catch (ParseException e) {
+            } catch (ParseException | IllegalArgumentException e) {
                 LogUtils.error(e.toString(), e);
             }
 
         }
 
         return date;
+    }
+
+    private String getExpDate(String token, JSONObject response, Instant requestedAt) {
+        String date = getExpDate(token);
+        if (!date.isEmpty()) {
+            return date;
+        }
+        Object expiresIn = response.get("expires_in");
+        if (expiresIn instanceof Number) {
+            Instant expiresAt = requestedAt.plusSeconds(((Number) expiresIn).longValue());
+            return df.format(Date.from(expiresAt));
+        }
+        return "";
     }
 
     @Override
@@ -124,6 +140,7 @@ public class TokenServiceImpl implements TokenService {
                     headers);
 
             try {
+                Instant requestedAt = Instant.now();
                 ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
 
                 HttpStatusCode responseHttpStatus = result.getStatusCode();
@@ -144,11 +161,13 @@ public class TokenServiceImpl implements TokenService {
 
                     String accessToken = null;
                     String refreshToken = null;
+                    String expDate = "";
 
                     try {
                         JSONObject js = (JSONObject) new JSONParser().parse(jwt);
                         accessToken = (String) js.get("access_token");
                         refreshToken = (String) js.get("refresh_token");
+                        expDate = getExpDate(accessToken, js, requestedAt);
                         
                         if (refreshToken != null) {
                             oauth2token.setRefreshToken(
@@ -170,7 +189,6 @@ public class TokenServiceImpl implements TokenService {
                     model.addAttribute("user", user);
                     model.addAttribute("token", accessToken);
 
-                    String expDate = getExpDate(accessToken);
                     model.addAttribute("exp", expDate);
 
                     try {
