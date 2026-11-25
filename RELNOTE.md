@@ -19,6 +19,9 @@ Release note for JWT server 1.3.0
   from `/login/oauth2/code/keycloak` to `/login/oauth2/code/oidc`
 * extend the column lengths of the existing tables: `user`, `audience`
   and `iv` to varchar(255) (see README.md for the procedure)
+* for redundant JWT servers, it is recommended to replicate the
+  `token_time` table as well, so that the date of issue is displayed on
+  every server (see doc/ja/redundancy.md for the procedure)
 
 Release note for JWT server 1.2.0
 =================================
