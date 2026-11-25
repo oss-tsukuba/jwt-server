@@ -1,16 +1,18 @@
 # Keycloak 設定手順
 
-本書ではJWT ServerでKeycloakを利用するさいの最低限の設定について説明する。なお、Keycloakはすでにインストールされており、利用可能な状態であることを前提とする。
+本書ではJWT ServerでKeycloakを利用する際の最低限の設定について説明する。なお、Keycloakはすでにインストールされており、利用可能な状態であることを前提とする。
 
 管理者ユーザでログインし設定を行う。
 
 ## レルムの作成
 
-「Realmn Setting」メニューを選択し、レルム「hpci」を作成する。
+「Create realm」より、レルム「hpci」を作成する。
 
 ## クライアントの作成
 
-レルム「hpci」配下に、クライアント「hpci-jwt-server」を作成する。「Access Type」はconfidentialとすることが望ましい。
+レルム「hpci」配下に、クライアント「hpci-jwt-server」を作成する。「Client authentication」をONとし、confidentialクライアントとすることが望ましい（古いバージョンのKeycloakでは「Access Type」をconfidentialとする）。
+
+「Valid redirect URIs」には、JWT ServerのリダイレクトURIを設定する。JWT ServerのURLが `https://jwt-server.example.org/` の場合は `https://jwt-server.example.org/login/oauth2/code/oidc` となる。設定しない場合、ログイン時に `Invalid parameter: redirect_uri` エラーとなる。
 
 ## ユーザの作成
 
