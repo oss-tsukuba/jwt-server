@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `token_time` (
 
 CREATE TABLE IF NOT EXISTS `issues` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `user` varchar(20) NOT NULL,
+  `user` varchar(255) NOT NULL,
   `date` timestamp NULL,
   `ip_addr` varchar(256) DEFAULT NULL,
   `hostname` varchar(256) DEFAULT NULL,
