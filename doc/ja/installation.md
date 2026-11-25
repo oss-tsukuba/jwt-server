@@ -351,6 +351,8 @@ $ mysql -u jwtserver -p jwtserverdb < jwt-server/ddl/jwt-server.ddl
 Enter password: DBPASSWORD …データベース・ユーザーのパスワード
 ```
 
+なお、DDLは `CREATE TABLE IF NOT EXISTS` で記述されているため、DDLの再実行では新規テーブルの追加のみが行われ、既存テーブルのカラム定義の変更は反映されません。既存テーブルの変更が必要な場合は、後述のバージョン毎の手順に従ってください。
+
 「JWT Serverのビルド」の手順に従ってビルドし、正常にビルドできることを確認します。
 
 apache httpd、tomcat の順で停止します。
@@ -366,6 +368,53 @@ tomcat、apache httpd の順で起動します。
 # systemctl start tomcat
 # systemctl start httpd
 ```
+
+## 1.2.0 以前から 1.3.0 への更新
+
+1.3.0 では設定プロパティ名とデータベース・スキーマが変更されています。上記の更新手順に加えて、以下の作業が必要です。
+
+### 設定プロパティ名の変更
+
+「JWT Serverの設定」に従い、ビルド前に `application.properties` の `spring.security.oauth2.client.registration.keycloak.*` と `spring.security.oauth2.client.provider.keycloak.*` を `oidc` に変更し、`provider` の値を `keycloak` から `oidc` に変更します。
+
+### カラム長の変更
+
+`errors`、`tokens`、`token_time` テーブルの `user`、および `tokens` テーブルの `audience`、`iv` のカラム長が varchar(255) に拡張されています。apache httpd と tomcat を停止した後、デプロイの前に以下を実施します。
+
+データベースのバックアップを取得します。
+
+```
+$ mysqldump -u jwtserver -p jwtserverdb > jwtserverdb-backup.sql
+Enter password: DBPASSWORD …データベース・ユーザーのパスワード
+```
+
+カラム長を変更します。`MODIFY` はカラム定義全体を置き換えるため、`NOT NULL` を省略しないでください。
+
+```
+$ mysql -u jwtserver -p jwtserverdb
+Enter password: DBPASSWORD …データベース・ユーザーのパスワード
+MariaDB [jwtserverdb]> ALTER TABLE `errors`
+    ->   MODIFY `user` varchar(255) NOT NULL;
+MariaDB [jwtserverdb]> ALTER TABLE `tokens`
+    ->   MODIFY `user` varchar(255) NOT NULL,
+    ->   MODIFY `audience` varchar(255) NOT NULL,
+    ->   MODIFY `iv` varchar(255) NOT NULL;
+MariaDB [jwtserverdb]> ALTER TABLE `token_time`
+    ->   MODIFY `user` varchar(255) NOT NULL;
+```
+
+変更結果を確認します。
+
+```
+MariaDB [jwtserverdb]> SHOW CREATE TABLE `errors`;
+MariaDB [jwtserverdb]> SHOW CREATE TABLE `tokens`;
+MariaDB [jwtserverdb]> SHOW CREATE TABLE `token_time`;
+MariaDB [jwtserverdb]> quit
+```
+
+冗長構成の場合、`ALTER TABLE` はレプリケーションにより他のサーバにも反映されます。1台で実行した後、各サーバで `SHOW CREATE TABLE` により変更が反映されていることを確認してください。
+
+`ALTER TABLE` が `Specified key was too long` で失敗する場合は、InnoDBの行フォーマットが COMPACT または REDUNDANT になっている可能性があります。`ALTER TABLE tokens ROW_FORMAT=DYNAMIC;` で行フォーマットを変更してから再度実行してください。
 
 # ユーザ毎にScopeを変更する場合
 

@@ -72,6 +72,19 @@ spring.datasource.password=${PASSWORD}
 - spring.datasource.username: username for the database
 - spring.datasource.password: password for the user
 
+When upgrading from 1.2.0 or earlier, extend the column lengths of the existing tables, since re-running `ddl/jwt-server.ddl` does not change existing tables. Stop the JWT server and back up the database before running the following.
+
+```sql
+ALTER TABLE `errors`
+  MODIFY `user` varchar(255) NOT NULL;
+ALTER TABLE `tokens`
+  MODIFY `user` varchar(255) NOT NULL,
+  MODIFY `audience` varchar(255) NOT NULL,
+  MODIFY `iv` varchar(255) NOT NULL;
+ALTER TABLE `token_time`
+  MODIFY `user` varchar(255) NOT NULL;
+```
+
 ### Other settings (optional)
 
 This is only for development and testing purpose.

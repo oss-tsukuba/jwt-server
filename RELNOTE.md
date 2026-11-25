@@ -9,6 +9,14 @@ Release note for JWT server 1.3.0
 
 ### Updated feature
 * support token refresh with or without refresh token rotation
+* display an error message when unauthorized
+
+### Upgrade notes
+* rename `spring.security.oauth2.client.registration.keycloak.*` and
+  `spring.security.oauth2.client.provider.keycloak.*` to `...oidc.*`,
+  and change the `provider` value from `keycloak` to `oidc`
+* extend the column lengths of the existing tables: `user`, `audience`
+  and `iv` to varchar(255) (see ddl/jwt-server.ddl)
 
 Release note for JWT server 1.2.0
 =================================
