@@ -1,3 +1,15 @@
+Release note for JWT server 1.3.0
+==============================================
+
+[2026.11.25]
+
+### New feature
+* support OpenID Connect (OIDC) identity providers
+* support opaque access tokens
+
+### Updated feature
+* support token refresh with or without refresh token rotation
+
 Release note for JWT server 1.2.0
 =================================
 
