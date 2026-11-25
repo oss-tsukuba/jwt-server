@@ -60,12 +60,12 @@ If this setting is missing, the `preferred_username` claim is used.
 
 ### Database settings
 
-Create a user `${USERNAME}` and a database `${DB}` with `ddl/jwt-server.ddl`.
+Create a user `${USER}` and a database `${DB}` with `ddl/jwt-server.ddl`.
 Change the following for your DBMS.
 
 ```
 spring.datasource.url=jdbc:mysql://${MYSQL_HOST:localhost}:3306/${DB}
-spring.datasource.username=${USERNAME}
+spring.datasource.username=${USER}
 spring.datasource.password=${PASSWORD}
 ```
 
