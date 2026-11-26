@@ -56,6 +56,19 @@ public class PassphraseController {
 
     private DateFormat formatter = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 
+    private String getUserName(Principal principal) {
+        String user = OidcUtil.getUserName(principal, userClaim);
+
+        if (user == null) {
+            // Without a user name nothing can be stored or looked up; show the error page.
+            throw new IllegalStateException(String.format("User name is not available from the claim '%s'."
+                    + " Check the user-claim property and the scope.",
+                    "".equals(userClaim) ? "preferred_username" : userClaim));
+        }
+
+        return user;
+    }
+
     @GetMapping(path = "/")
     public String getRoot(Model model) {
 
@@ -70,7 +83,7 @@ public class PassphraseController {
 
     @GetMapping(path = "/menu")
     public String getMenu(Principal principal, Model model) {
-        String user = OidcUtil.getUserName(principal, userClaim);
+        String user = getUserName(principal);
 
         model.addAttribute("version", version);
 
@@ -96,6 +109,8 @@ public class PassphraseController {
 
     @PostMapping(path = "/passphrase")
     public String getPassphrase(Principal principal, Model model, HttpServletRequest request) {
+        String user = getUserName(principal);
+
         model.addAttribute("error", 0);
         tokenService.getToken(principal, model);
 
@@ -110,7 +125,6 @@ public class PassphraseController {
             hostname = "";
         }
 
-        String user = OidcUtil.getUserName(principal, userClaim);
         Issue issue = new Issue(user, ipAddr, hostname, Issue.PASSPHRASE);
         model.addAttribute("date", formatter.format(issue.getDate()));
         model.addAttribute("offset", OffsetDateTime.now().getOffset());
@@ -140,7 +154,7 @@ public class PassphraseController {
 
     @GetMapping(path = "/errors")
     public String getErrros(Principal principal, Model model, Pageable pageable) {
-        String user = OidcUtil.getUserName(principal, userClaim);
+        String user = getUserName(principal);
         Page<Error> errors = errorRepository.findByUserOrderByIdDesc(pageable, user);
         model.addAttribute("page", errors);
         model.addAttribute("errors", errors.getContent());
@@ -152,7 +166,7 @@ public class PassphraseController {
 
     @GetMapping(path = "/issues")
     public String getIssues(Principal principal, Model model, Pageable pageable) {
-        String user = OidcUtil.getUserName(principal, userClaim);
+        String user = getUserName(principal);
         Page<Issue> issues = issueRepository.findByUserOrderByDateDesc(pageable, user);
         model.addAttribute("page", issues);
         model.addAttribute("issues", issues.getContent());

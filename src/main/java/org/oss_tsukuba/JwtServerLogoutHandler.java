@@ -35,19 +35,16 @@ public class JwtServerLogoutHandler extends OidcClientInitiatedLogoutSuccessHand
 
         super.onLogoutSuccess(request, response, authentication);
 
-        // save logout time;
-        Optional<TokenTime> opt = tokenTimeRepository.findById(user);
-        TokenTime tokenTime = null;
+        // save logout time, only for a user who has generated a token
+        if (user != null) {
+            Optional<TokenTime> opt = tokenTimeRepository.findById(user);
 
-        if (opt.isPresent()) {
-            tokenTime = opt.get();
-        } else {
-            tokenTime = new TokenTime();
+            if (opt.isPresent()) {
+                TokenTime tokenTime = opt.get();
+                tokenTime.setLogoutAt(Instant.now().getEpochSecond());
+                tokenTimeRepository.save(tokenTime);
+            }
         }
-
-        tokenTime.setLogoutAt(Instant.now().getEpochSecond());
-
-        tokenTimeRepository.save(tokenTime);
     }
 
 }
