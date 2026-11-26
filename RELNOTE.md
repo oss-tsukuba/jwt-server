@@ -8,7 +8,8 @@ Release note for JWT server 1.3.0
 * support opaque access tokens
 
 ### Updated features
-* support token refresh with or without refresh token rotation
+* support token refresh with or without refresh token rotation (see
+  README.md for the limitations with refresh token rotation)
 * display an error message when unauthorized
 * display an error instead of failing when the identity provider does
   not issue a refresh token or the user name claim is not available
