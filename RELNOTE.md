@@ -15,8 +15,13 @@ Release note for JWT server 1.3.0
 * rename `spring.security.oauth2.client.registration.keycloak.*` and
   `spring.security.oauth2.client.provider.keycloak.*` to `...oidc.*`,
   and change the `provider` value from `keycloak` to `oidc`
+* change the valid redirect URI of the client on the identity provider
+  from `/login/oauth2/code/keycloak` to `/login/oauth2/code/oidc`
 * extend the column lengths of the existing tables: `user`, `audience`
-  and `iv` to varchar(255) (see ddl/jwt-server.ddl)
+  and `iv` to varchar(255) (see README.md for the procedure)
+* for redundant JWT servers, it is recommended to replicate the
+  `token_time` table as well, so that the date of issue is displayed on
+  every server (see doc/ja/redundancy.md for the procedure)
 
 Release note for JWT server 1.2.0
 =================================

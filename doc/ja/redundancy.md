@@ -25,7 +25,7 @@ auto_increment_increment=5
 auto_increment_offset=1
 
 replicate-do-table=jwtserverdb.tokens
-replicate-ignore-table=jwtserverdb.errors
+replicate-do-table=jwtserverdb.token_time
 
 master_retry_count=0
 ```
@@ -34,19 +34,19 @@ master_retry_count=0
 - server-id: ユニークなIDを指定する。
 - log-basename: ログのファイル名を指定する。
 - auto_increment_increment, auto_increment_offset: Server2と重複しないように連続するカラム値の間隔を指定する。
-- replicate-do-table: レプリケーションを実行するテーブルを指定する。
-- replicate-ignore-table: レプリケーションを実行しないテーブルを指定する。
+- replicate-do-table: レプリケーションを実行するテーブルを指定する。複数のテーブルを指定する場合は、テーブル毎に1行ずつ記述する。指定したテーブル以外はレプリケーションされない。
 - master_retry_count: マスタに接続できない場合に接続を試みる回数を指定する（0:無限）。
 
-  サーバを再起動する。
+サーバを再起動する。
 
 ```
-# systemctl restart mysql
+# systemctl restart mariadb
 ```
 
 ### マスタ/スレーブの設定
 
 レプリケーション用のユーザ（replica）を作成し権限を設定する。パスワード（PASSWORD）はServer2の設定で利用する。
+
 ```
 CREATE USER 'replica'@'%' IDENTIFIED BY 'PASSWORD';
 RESET MASTER;
@@ -54,6 +54,7 @@ GRANT REPLICATION SLAVE ON *.* TO 'replica'@'%';
 ```
 
 スレーブの設定を行う。
+
 ```
 CHANGE MASTER TO
  MASTER_HOST = 'Server2',
@@ -69,8 +70,8 @@ START SLAVE;
 - MASTER_PORT: Server2のポート番号を指定する。
 - MASTER_USER: レプリケーション用にServer2で作成したユーザを指定する。
 - MASTER_PASSWORD: Server2で指定したパスワードを指定する。
-- MASTER_CONNECT_RETRY: 接続を試行する間隔を指定する（デフォルトは60秒）
-- MASTER_USE_GTID: マスタのGTIDを指定する。
+- MASTER_CONNECT_RETRY: 接続を試行する間隔を指定する（デフォルトは60秒）。
+- MASTER_USE_GTID: GTIDを利用してレプリケーションを行う。
 
 ## Server2の設定
 
@@ -88,7 +89,7 @@ auto_increment_increment=5
 auto_increment_offset=2
 
 replicate-do-table=jwtserverdb.tokens
-replicate-ignore-table=jwtserverdb.errors,jwtserverdb.issues
+replicate-do-table=jwtserverdb.token_time
 
 master_retry_count=0
 ```
@@ -97,19 +98,19 @@ master_retry_count=0
 - server-id: ユニークなIDを指定する。
 - log-basename: ログのファイル名を指定する。
 - auto_increment_increment, auto_increment_offset: Server1と重複しないように連続するカラム値の間隔を指定する。
-- replicate-do-table: レプリケーションを実行するテーブルを指定する。
-- replicate-ignore-table: レプリケーションを実行しないテーブルを指定する。
+- replicate-do-table: レプリケーションを実行するテーブルを指定する。複数のテーブルを指定する場合は、テーブル毎に1行ずつ記述する。指定したテーブル以外はレプリケーションされない。
 - master_retry_count: マスタに接続できない場合に接続を試みる回数を指定する（0:無限）。
 
-  サーバを再起動する。
+サーバを再起動する。
 
 ```
-# systemctl restart mysql
+# systemctl restart mariadb
 ```
 
 ### マスタ/スレーブの設定
 
 レプリケーション用のユーザ（replica）を作成し権限を設定する。パスワード（PASSWORD）はServer1の設定で利用する。
+
 ```
 CREATE USER 'replica'@'%' IDENTIFIED BY 'PASSWORD';
 RESET MASTER;
@@ -117,6 +118,7 @@ GRANT REPLICATION SLAVE ON *.* TO 'replica'@'%';
 ```
 
 スレーブの設定を行う。
+
 ```
 CHANGE MASTER TO
  MASTER_HOST = 'Server1',
@@ -132,8 +134,29 @@ START SLAVE;
 - MASTER_PORT: Server1のポート番号を指定する。
 - MASTER_USER: レプリケーション用にServer1で作成したユーザを指定する。
 - MASTER_PASSWORD: Server1で指定したパスワードを指定する。
-- MASTER_CONNECT_RETRY: 接続を試行する間隔を指定する（デフォルトは60秒）
-- MASTER_USE_GTID: マスタのGTIDを指定する。
+- MASTER_CONNECT_RETRY: 接続を試行する間隔を指定する（デフォルトは60秒）。
+- MASTER_USE_GTID: GTIDを利用してレプリケーションを行う。
+
+## 既存の冗長構成に token_time テーブルのレプリケーションを追加する場合
+
+`replicate-do-table=jwtserverdb.token_time` を設定していない冗長構成では、`token_time` テーブルの内容がサーバ間で異なっている。そのまま設定を追加すると、一方のサーバにのみ存在するユーザの行が他方で追加された際に `Duplicate entry` エラーとなり、レプリケーションが停止する。
+
+設定を追加する前に、すべてのJWT Serverを停止し、それぞれのMariaDB Serverで `token_time` テーブルの内容を削除しておく。
+
+```
+# mysql -u root
+MariaDB [(none)]> SET sql_log_bin = 0;
+MariaDB [(none)]> DELETE FROM jwtserverdb.token_time;
+MariaDB [(none)]> quit
+```
+
+その後、それぞれのサーバの設定ファイルに `replicate-do-table=jwtserverdb.token_time` を追加し、MariaDB Serverを再起動する。
+
+```
+# systemctl restart mariadb
+```
+
+`token_time` テーブルはメニュー画面にトークンの発行日時を表示するために利用している。内容を削除すると、次にトークンを発行するまで発行日時が表示されなくなるが、発行済みのトークンには影響しない。
 
 ## 運用時の障害について
 
