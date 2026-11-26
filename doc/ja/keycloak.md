@@ -14,6 +14,8 @@
 
 「Valid redirect URIs」には、JWT ServerのリダイレクトURIを設定する。JWT ServerのURLが `https://jwt-server.example.org/` の場合は `https://jwt-server.example.org/login/oauth2/code/oidc` となる。設定しない場合、ログイン時に `Invalid parameter: redirect_uri` エラーとなる。
 
+「Valid post logout redirect URIs」には、JWT ServerのURLを設定する。JWT ServerのURLが `https://jwt-server.example.org/` の場合は `https://jwt-server.example.org` となる。設定しない場合は「Valid redirect URIs」の値が使われるが、上記のリダイレクトURIとは一致しないため、「IdP Logout」の実行時にKeycloakで `Invalid redirect uri` エラーとなり、Keycloakからログアウトされない。
+
 ## ユーザの作成
 
 「Users」メニューより、必要に応じてユーザを作成する。
