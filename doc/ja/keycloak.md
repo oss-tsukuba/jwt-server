@@ -14,9 +14,23 @@
 
 「Valid redirect URIs」には、JWT ServerのリダイレクトURIを設定する。JWT ServerのURLが `https://jwt-server.example.org/` の場合は `https://jwt-server.example.org/login/oauth2/code/oidc` となる。設定しない場合、ログイン時に `Invalid parameter: redirect_uri` エラーとなる。
 
+「Valid post logout redirect URIs」には、JWT ServerのURLを設定する。JWT ServerのURLが `https://jwt-server.example.org/` の場合は `https://jwt-server.example.org` となる。設定しない場合は「Valid redirect URIs」の値が使われるが、上記のリダイレクトURIとは一致しないため、「IdP Logout」の実行時にKeycloakで `Invalid redirect uri` エラーとなり、Keycloakからログアウトされない。
+
 ## ユーザの作成
 
 「Users」メニューより、必要に応じてユーザを作成する。
+
+## リフレッシュトークンのローテーションを有効にする場合
+
+レルムの「Realm settings」→「Tokens」で「Revoke Refresh Token」を有効にすると、リフレッシュトークンは一度使うと無効になり、アクセストークンの取得のたびに新しいリフレッシュトークンが発行される。JWT Serverは新しいリフレッシュトークンを保存するので、この設定でも利用できる。
+
+ただし、Keycloakは使用済みのリフレッシュトークンが再度使われたことを検知すると、そのログインで発行したトークンをすべて無効にする。この場合、JWT Serverに保存されているトークンも使えなくなり、jwt-agentやjwt-logonは認証エラーとなる。以下の場合にこの状態になるので注意する。
+
+- jwt-agentやjwt-logonでアクセストークンを取得した後に、同じブラウザのセッションでトークンを再生成した場合。「Possibly Unauthorized」と表示され、再生成に失敗する。再生成する場合は、先に「IdP Logout」でログアウトし、ログインし直す。
+- 同じパスフレーズを使って、複数のホストから同時にアクセストークンを取得した場合。
+- JWT Serverを冗長化していて、データベースのレプリケーションが遅延または停止している間に、複数のJWT Serverでアクセストークンを取得した場合。
+
+この状態になった場合は、「IdP Logout」でログアウトしてログインし直し、トークンを再生成する。
 
 ## ユーザ毎にトークンのScopeを変更する場合
 

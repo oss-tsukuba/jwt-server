@@ -122,6 +122,18 @@ public class TokenServiceImpl implements TokenService {
             EnhancedOAuth2AuthenticationToken oauth2token = (EnhancedOAuth2AuthenticationToken) principal;
 
             String user = OidcUtil.getUserName(principal, userClaim);
+
+            if (oauth2token.getRefreshToken() == null) {
+                // The identity provider did not issue a refresh token at login.
+                model.addAttribute("error", 2);
+                Error error = new Error(user, "", "jwt-server", UNEXPECTED_ERROR);
+                errorRepository.save(error);
+
+                LogUtils.error(String.format("No refresh token was issued for user %s."
+                        + " Check the scope and the client settings of the identity provider.", user));
+                return;
+            }
+
             String rToken = oauth2token.getRefreshToken().getTokenValue();
 
             ClientRegistration registration =

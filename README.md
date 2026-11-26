@@ -47,6 +47,16 @@ spring.security.oauth2.client.provider.oidc.issuer-uri=https://${KEYCLOAK}:443/a
 
 When upgrading, rename `spring.security.oauth2.client.registration.keycloak.*` to `spring.security.oauth2.client.registration.oidc.*` and `spring.security.oauth2.client.provider.keycloak.*` to `spring.security.oauth2.client.provider.oidc.*`, and change the registration's `provider` value from `keycloak` to `oidc`. The path of the redirect URI also changes from `/login/oauth2/code/keycloak` to `/login/oauth2/code/oidc`, so update the valid redirect URIs of the client on Keycloak.
 
+#### Refresh token rotation
+
+The JWT server works with refresh token rotation ("Revoke Refresh Token" in the realm settings of Keycloak), since it stores the new refresh token each time an access token is retrieved. However, when a refresh token that has already been used is used again, Keycloak revokes all the tokens of that login, and the token stored in the JWT server stops working. This happens in the following cases.
+
+- A token is re-generated in the same browser session after `jwt-agent` or `jwt-logon` retrieved an access token. The re-generation fails with "Possibly Unauthorized". Log out by "IdP Logout" and log in again before re-generating.
+- Access tokens are retrieved at the same time from multiple hosts with the same passphrase.
+- The JWT servers are redundant, and access tokens are retrieved on multiple JWT servers while the database replication is delayed or stopped.
+
+To recover, log out by "IdP Logout", log in again, and re-generate the token.
+
 ### OAuth2 token setting
 
 Specify the claim for the user name.

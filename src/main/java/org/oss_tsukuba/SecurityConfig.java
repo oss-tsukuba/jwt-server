@@ -47,7 +47,7 @@ public class SecurityConfig  {
                 authorize -> authorize
                         .requestMatchers("/css/**", "/img/**", "/js/**",
                             "/jwt", "/chpass", "/init_jwt",
-                            "/webjars/**").permitAll()
+                            "/webjars/**", "/error").permitAll()
                         .requestMatchers("/", "/menu*", "/passphrase*",
                             "/errors*", "/issues*").authenticated())
                 .csrf(csrf -> csrf
