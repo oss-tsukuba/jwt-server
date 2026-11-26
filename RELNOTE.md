@@ -1,7 +1,7 @@
 Release note for JWT server 1.3.0
 =================================
 
-[2026.11.25]
+[2026.11.26]
 
 ### New features
 * support OpenID Connect (OIDC) identity providers
@@ -10,6 +10,8 @@ Release note for JWT server 1.3.0
 ### Updated features
 * support token refresh with or without refresh token rotation
 * display an error message when unauthorized
+* display an error instead of failing when the identity provider does
+  not issue a refresh token or the user name claim is not available
 
 ### Upgrade notes
 * rename `spring.security.oauth2.client.registration.keycloak.*` and
